@@ -13,7 +13,7 @@ class DTBrokerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'DT Broker',
+      title: 'Nivesh Core',
       theme: ThemeData(
         primaryColor: const Color(0xffE6C56F),
         scaffoldBackgroundColor: Colors.white,

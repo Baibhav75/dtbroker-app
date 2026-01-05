@@ -54,6 +54,7 @@ dependencies:
   open_file: ^3.5.10
   flutter_screenutil: ^5.9.3
   provider: ^6.1.5+1
+  change_app_package_name: ^1.5.0
 
 dev_dependencies:
   flutter_test:
@@ -67,8 +68,8 @@ dev_dependencies:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/images/ic_launcher.png"
-  adaptive_icon_foreground: "assets/images/ic_launcher.png"
+  image_path: "assets/images/appstore.png"
+  adaptive_icon_foreground: "assets/images/appstore.png"
   adaptive_icon_background: "#FFFFFF"
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -95,6 +96,9 @@ flutter:
     - assets/images/homeimg.png
     - assets/images/DT broker.png
     - assets/images/ic_launcher.png
+    - assets/images/appicon.png
+    - assets/images/niveshtital.png
+    - assets/images/appstore.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -1,4 +1,4 @@
-package com.example.dtbroker
+package com.niveshcore.niveshapp
 
 import io.flutter.embedding.android.FlutterActivity
 

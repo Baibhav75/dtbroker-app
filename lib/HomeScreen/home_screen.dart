@@ -305,7 +305,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(width: 4),
               const Text(
-                'California, United States',
+                'noida bhutani tower, india',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,

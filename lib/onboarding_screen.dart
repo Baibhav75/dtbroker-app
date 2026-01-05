@@ -58,7 +58,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         child: Column(
                           children: [
                             Image.asset(
-                              'assets/images/DT broker.png',
+                              'assets/images/niveshtital.png',
                               width: 350,
                             ),
                             const SizedBox(height: 6),

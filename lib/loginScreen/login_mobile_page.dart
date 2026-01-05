@@ -37,7 +37,7 @@ class _LoginMobilePageState extends State<LoginMobilePage> {
         child: Column(
           children: [
             const SizedBox(height: 1),
-            Image.asset('assets/images/DT broker.png', height: 200),
+            Image.asset('assets/images/niveshtital.png', height: 200),
             const SizedBox(height: 5),
             const Text(
               "Welcome back !",

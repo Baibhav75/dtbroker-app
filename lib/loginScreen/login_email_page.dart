@@ -70,7 +70,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
 
               // ✅ FIX 2: safe asset name
               Image.asset(
-                'assets/images/DT broker.png',
+                'assets/images/niveshtital.png',
                 height: 350,
                 width: 350,
               ),

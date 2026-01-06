@@ -11,10 +11,24 @@ class LoginEmailPage extends StatefulWidget {
 }
 
 class _LoginEmailPageState extends State<LoginEmailPage> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  late TextEditingController _emailController = TextEditingController();
+  late TextEditingController _passwordController = TextEditingController();
 
   bool _isLoading = false; // ✅ FIX 1
+
+  @override
+  void initState() {
+    super.initState();
+
+    // ✅ DEFAULT VALUES
+    _emailController = TextEditingController(
+      text: "9999999999", // default mobile/email
+    );
+
+    _passwordController = TextEditingController(
+      text: "123456", // default password
+    );
+  }
 
   void _login() async {
     FocusScope.of(context).unfocus();
@@ -61,117 +75,134 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: true, // ✅ Important
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              const SizedBox(height: 10),
-
-              // ✅ FIX 2: safe asset name
-              Image.asset(
-                'assets/images/niveshtital.png',
-                height: 350,
-                width: 350,
-              ),
-
-
-
-              TextField(
-                controller: _emailController,
-                decoration: _inputDecoration("Email Address"),
-              ),
-
-              const SizedBox(height: 12),
-
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: _inputDecoration("Password"),
-              ),
-
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {},
-                  child: const Text("Forgot password?"),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              keyboardDismissBehavior:
+              ScrollViewKeyboardDismissBehavior.onDrag,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
                 ),
-              ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 10),
 
-              // ✅ FIX 3: Loading button
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _login,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xffE6C56F),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.black,
-                    ),
-                  )
-                      : const Text(
-                    "Login",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              OutlinedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.g_mobiledata),
-                label: const Text("Sign in with Google"),
-                style: _outlineStyle(),
-              ),
-
-              const SizedBox(height: 10),
-
-              OutlinedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const LoginMobilePage(),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.phone),
-                label: const Text("Sign in with Mobile Number"),
-                style: _outlineStyle(),
-              ),
-
-              const Spacer(),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Don't have an account?"),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const SignupPage(),
+                        // LOGO
+                        Image.asset(
+                          'assets/images/niveshtital.png',
+                          height: 300,
                         ),
-                      );
-                    },
-                    child: const Text("Sign Up"),
-                  )
-                ],
-              )
-            ],
-          ),
+
+                        const SizedBox(height: 20),
+
+                        TextField(
+                          controller: _emailController,
+                          decoration: _inputDecoration("Email Address"),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        TextField(
+                          controller: _passwordController,
+                          obscureText: true,
+                          decoration: _inputDecoration("Password"),
+                        ),
+
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {},
+                            child: const Text("Forgot password?"),
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        // LOGIN BUTTON
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _login,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xffE6C56F),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.black,
+                              ),
+                            )
+                                : const Text(
+                              "Login",
+                              style: TextStyle(color: Colors.black),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        OutlinedButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.real_estate_agent),
+                          label: const Text("Agent Login"),
+                          style: _outlineStyle(),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const LoginMobilePage(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.developer_board),
+                          label: const Text("Developer Login"),
+                          style: _outlineStyle(),
+                        ),
+
+                        const Spacer(), // ✅ Now SAFE
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text("Don't have an account?"),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const SignupPage(),
+                                  ),
+                                );
+                              },
+                              child: const Text("Sign Up"),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

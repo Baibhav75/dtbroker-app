@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../Agentchat/chat_page.dart';
 import 'property_detail_screen.dart';
 import 'models/property_model.dart';
 
@@ -10,8 +11,7 @@ class ShortlistedScreenContent extends StatefulWidget {
       _ShortlistedScreenContentState();
 }
 
-class _ShortlistedScreenContentState
-    extends State<ShortlistedScreenContent> {
+class _ShortlistedScreenContentState extends State<ShortlistedScreenContent> {
   final List<Property> _shortlistedProperties = [
     Property(
       id: '1',
@@ -40,6 +40,16 @@ class _ShortlistedScreenContentState
       address: '2925 Woodside Road, California',
       rating: 4.7,
       price: '\$ 8290',
+      imageUrl: 'assets/images/homeimg.png',
+      tag: 'Rent',
+    ),
+    Property(
+      id: '4',
+      title: 'Predeep villa',
+      type: 'Villa',
+      address: '2925 Woodside Road, California',
+      rating: 4.7,
+      price: '\$ 82909',
       imageUrl: 'assets/images/homeimg.png',
       tag: 'Rent',
     ),
@@ -101,8 +111,10 @@ class _ShortlistedScreenContentState
                                 },
                                 child: const CircleAvatar(
                                   backgroundColor: Colors.white,
-                                  child: Icon(Icons.favorite,
-                                      color: Colors.red),
+                                  child: Icon(
+                                    Icons.favorite,
+                                    color: Colors.red,
+                                  ),
                                 ),
                               ),
                             ),
@@ -115,7 +127,9 @@ class _ShortlistedScreenContentState
                         Text(
                           property.title,
                           style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
 
                         const SizedBox(height: 4),
@@ -123,15 +137,19 @@ class _ShortlistedScreenContentState
                         /// ADDRESS
                         Row(
                           children: [
-                            const Icon(Icons.location_on,
-                                size: 14, color: Colors.grey),
+                            const Icon(
+                              Icons.location_on,
+                              size: 14,
+                              color: Colors.grey,
+                            ),
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
                                 property.address,
                                 style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600]),
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -142,8 +160,7 @@ class _ShortlistedScreenContentState
 
                         /// PRICE + RATING
                         Row(
-                          mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
                               property.price,
@@ -155,8 +172,11 @@ class _ShortlistedScreenContentState
                             ),
                             Row(
                               children: [
-                                const Icon(Icons.star,
-                                    size: 16, color: Colors.amber),
+                                const Icon(
+                                  Icons.star,
+                                  size: 16,
+                                  color: Colors.amber,
+                                ),
                                 Text(" ${property.rating}"),
                               ],
                             ),
@@ -169,13 +189,17 @@ class _ShortlistedScreenContentState
                         Row(
                           children: [
                             Expanded(
-                              child: OutlinedButton(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange,
+                                ),
                                 onPressed: () {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(
-                                    const SnackBar(
-                                        content: Text(
-                                            'Opening chat...')),
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>const ChatPage(
+                                      ),
+                                    ),
                                   );
                                 },
                                 child: const Text("Chat"),
@@ -191,9 +215,9 @@ class _ShortlistedScreenContentState
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) =>
-                                          PropertyDetailScreen(property: property,
-                                              ),
+                                      builder: (_) => PropertyDetailScreen(
+                                        property: property,
+                                      ),
                                     ),
                                   );
                                 },

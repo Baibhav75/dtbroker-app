@@ -1,5 +1,11 @@
 import 'package:dtbroker/HomeScreen/my_profile_screen.dart';
+import 'package:dtbroker/profile/AboutAppPage.dart';
+import 'package:dtbroker/profile/my_posted_properties_page.dart';
 import 'package:flutter/material.dart';
+
+import '../profile/change_password_page.dart';
+import '../profile/history_page.dart' show HistoryPage;
+import '../profile/support_page.dart';
 
 class ProfileScreenContent extends StatelessWidget {
   const ProfileScreenContent({super.key});
@@ -25,7 +31,7 @@ class ProfileScreenContent extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     Text(
-                      'Aleen Shroff',
+                      'Aleen Sarraf',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -65,7 +71,12 @@ class ProfileScreenContent extends StatelessWidget {
             icon: Icons.home_work_outlined,
             title: 'My Posted Properties',
             onTap: () {
-              // TODO: Navigate to Posted Properties screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const MyPostedPropertiesPage(),
+                ),
+              );
             },
           ),
 
@@ -73,7 +84,12 @@ class ProfileScreenContent extends StatelessWidget {
             icon: Icons.history,
             title: 'History',
             onTap: () {
-              // TODO: Navigate to History screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const HistoryPage(),
+                ),
+              );
             },
           ),
 
@@ -81,7 +97,12 @@ class ProfileScreenContent extends StatelessWidget {
             icon: Icons.lock_outline,
             title: 'Change Password',
             onTap: () {
-              // TODO: Navigate to Change Password screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ChangePasswordPage(),
+                ),
+              );
             },
           ),
 
@@ -89,7 +110,12 @@ class ProfileScreenContent extends StatelessWidget {
             icon: Icons.description_outlined,
             title: 'Terms & Use',
             onTap: () {
-              // TODO: Navigate to Terms screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SupportPage(),
+                ),
+              );
             },
           ),
 
@@ -97,15 +123,25 @@ class ProfileScreenContent extends StatelessWidget {
             icon: Icons.privacy_tip_outlined,
             title: 'Privacy & Policy',
             onTap: () {
-              // TODO: Navigate to Privacy Policy screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SupportPage(),
+                ),
+              );
             },
           ),
 
           _menuItem(
             icon: Icons.info_outline,
             title: 'About App',
-            onTap: () {
-              // TODO: Navigate to About screen
+            onTap: (){
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AboutAppPage(),
+                ),
+              );
             },
           ),
 

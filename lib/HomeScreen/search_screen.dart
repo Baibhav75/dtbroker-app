@@ -18,7 +18,7 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
       type: 'Villa',
       address: '2925 Woodside Road, California',
       rating: 4.5,
-      price: '\$2290',
+      price: '₹2990',
       imageUrl: 'assets/images/homeimg.png',
       tag: 'Rent',
     ),
@@ -28,7 +28,7 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
       type: 'Apartment',
       address: 'Columbia Road, California',
       rating: 4.5,
-      price: '\$1890',
+      price: '₹1890',
       imageUrl: 'assets/images/homeimg.png',
       tag: 'Rent',
     ),
@@ -38,7 +38,7 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
       type: 'Villa',
       address: '123 Main Street, California',
       rating: 4.8,
-      price: '\$2990',
+      price: '₹67463',
       imageUrl: 'assets/images/homeimg.png',
       tag: 'Rent',
     ),
@@ -48,7 +48,7 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
       type: 'Apartment',
       address: '456 Park Avenue, California',
       rating: 4.7,
-      price: '\$2490',
+      price: '₹7647',
       imageUrl: 'assets/images/homeimg.png',
       tag: 'Rent',
     ),
@@ -58,7 +58,7 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
       type: 'Villa',
       address: '789 Ocean Drive, California',
       rating: 4.8,
-      price: '\$4590',
+      price: '₹2990876',
       imageUrl: 'assets/images/homeimg.png',
       tag: 'Rent',
     ),
@@ -96,115 +96,130 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-        children: [
-          // Search bar
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8F5E9), // Light green
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: TextField(
-                controller: _searchController,
-                decoration: const InputDecoration(
-                  hintText: 'Search by name, type, or location...',
-                  prefixIcon: Icon(Icons.search, color: Colors.grey),
-                  border: InputBorder.none,
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          "Search Properties",
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Search bar
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8F5E9),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: const InputDecoration(
+                    hintText: 'Search by name, type, or location...',
+                    prefixIcon: Icon(Icons.search, color: Colors.grey),
+                    border: InputBorder.none,
+                    contentPadding:
+                    EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
                 ),
               ),
             ),
-          ),
-          // Filter chips
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SizedBox(
-              height: 40,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
+
+            // Filters
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SizedBox(
+                height: 40,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    _buildFilterChip('All', true),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('Villa', false),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('Apartment', false),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('Home', false),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Result count
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildFilterChip('All', true),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('Villa', false),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('Apartment', false),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('Home', false),
+                  Text(
+                    '${_filteredProperties.length} Properties Found',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Icon(Icons.filter_list),
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          // Results count
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${_filteredProperties.length} Properties Found',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                  ),
+
+            // Property list
+            Expanded(
+              child: _filteredProperties.isEmpty
+                  ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.search_off,
+                        size: 64, color: Colors.grey[400]),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No properties found',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: const Icon(Icons.filter_list, color: Colors.black),
-                  onPressed: () {
-                    // Show filter dialog
-                  },
+              )
+                  : GridView.builder(
+                padding: const EdgeInsets.all(16),
+                gridDelegate:
+                const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.75,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
                 ),
-              ],
+                itemCount: _filteredProperties.length,
+                itemBuilder: (context, index) {
+                  return PropertyCard(
+                    property: _filteredProperties[index],
+                    onTap: () {},
+                  );
+                },
+              ),
             ),
-          ),
-          // Property list
-          Expanded(
-            child: _filteredProperties.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.search_off,
-                          size: 64,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No properties found',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : GridView.builder(
-                    padding: const EdgeInsets.all(16),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.75,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                    ),
-                    itemCount: _filteredProperties.length,
-                    itemBuilder: (context, index) {
-                      return PropertyCard(
-                        property: _filteredProperties[index],
-                        onTap: () {
-                          // Navigate to property details
-                        },
-                      );
-                    },
-                  ),
-          ),
-        ],
+          ],
+        ),
+      ),
     );
   }
 

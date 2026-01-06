@@ -1,12 +1,14 @@
 import 'package:dtbroker/HomeScreen/notification_screen.dart';
+import 'package:dtbroker/HomeScreen/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'models/property_model.dart';
 import 'widgets/banner_carousel.dart';
 import 'widgets/property_card.dart';
 import 'shortlisted_screen.dart';
-import 'search_screen.dart';
 import 'inbox_screen.dart';
 import 'profile_screen.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,7 +19,69 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentBottomNavIndex = 0;
-  bool _showSearchScreen = false;
+
+  final TextEditingController _searchController = TextEditingController();
+
+  List<Property> _filteredFeatured = [];
+  List<Property> _filteredNewlyAdded = [];
+
+  // 📍 LIVE LOCATION STATE
+  String _currentLocation = "Detecting location...";
+  bool _isLocationLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _getLiveLocation();
+    _filteredFeatured = List.from(_featuredProperties);
+    _filteredNewlyAdded = List.from(_newlyAddedProperties);
+  }
+
+  // ================= LOCATION FUNCTION =================
+  Future<void> _getLiveLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        setState(() {
+          _currentLocation = "Location disabled";
+          _isLocationLoading = false;
+        });
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          setState(() {
+            _currentLocation = "Permission denied";
+            _isLocationLoading = false;
+          });
+          return;
+        }
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      List<Placemark> placemarks =
+      await placemarkFromCoordinates(position.latitude, position.longitude);
+
+      Placemark place = placemarks.first;
+
+      setState(() {
+        _currentLocation =
+        "${place.locality}, ${place.subLocality ?? place.administrativeArea}";
+        _isLocationLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _currentLocation = "Location error";
+        _isLocationLoading = false;
+      });
+    }
+  }
 
   // Sample banner data
   final List<BannerItem> _banners = [
@@ -33,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
     BannerItem(
       id: '2',
-      imageUrl: 'assets/images/homeimg.png',
+      imageUrl: 'assets/images/testimagelogo.png',
       title: 'FIND YOUR DREAM HOME',
       subtitle: 'YOUR DREAM COME TRUE',
       description1:
@@ -41,13 +105,23 @@ class _HomeScreenState extends State<HomeScreen> {
       description2:
           'Get personalized recommendations based on your preferences.',
     ),
+    BannerItem(
+      id: '3',
+      imageUrl: 'assets/images/bookimg.png',
+      title: 'FIND YOUR DREAM HOME',
+      subtitle: 'YOUR DREAM COME TRUE',
+      description1:
+      'Discover amazing properties with the best locations and prices.',
+      description2:
+      'Get personalized recommendations based on your preferences.',
+    ),
   ];
 
   // Property categories
   final List<PropertyCategory> _categories = [
     PropertyCategory(
       id: '1',
-      name: 'Home',
+      name: 'House',
       icon: Icons.home,
     ),
     PropertyCategory(
@@ -62,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
     PropertyCategory(
       id: '4',
-      name: 'P.G',
+      name: 'plot',
       icon: Icons.house,
     ),
   ];
@@ -75,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
       type: 'Villa',
       address: '2925 Woodside Road, California',
       rating: 4.5,
-      price: '\$2290',
+      price: '₹2990',
       imageUrl: 'assets/images/homeimg.png',
       tag: 'Rent',
     ),
@@ -85,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
       type: 'Apartment',
       address: 'Columbia Road, California',
       rating: 4.5,
-      price: '\$1890',
+      price: '₹2990',
       imageUrl: 'assets/images/homeimg.png',
       tag: 'Rent',
     ),
@@ -99,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
       type: 'Villa',
       address: '123 Main Street, California',
       rating: 4.8,
-      price: '\$2990',
+      price: '₹2990',
       imageUrl: 'assets/images/homeimg.png',
       tag: 'Rent',
     ),
@@ -109,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
       type: 'Apartment',
       address: '456 Park Avenue, California',
       rating: 4.7,
-      price: '\$2490',
+      price: '₹2990',
       imageUrl: 'assets/images/homeimg.png',
       tag: 'Rent',
     ),
@@ -117,30 +191,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _handleNavigation(int index) {
     if (index == 2) {
-      // Add button - show dialog and stay on current screen
-      _showAddPropertyDialog();
-      return;
+      // ✅ Navigate to SearchHomePage
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>  SearchScreenContent(),
+        ),
+      );
+      return; // ❗ DO NOT update bottom index
     }
+
     setState(() {
       _currentBottomNavIndex = index;
-      _showSearchScreen = false;
     });
-  }
-
-  void _showAddPropertyDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Property'),
-        content: const Text('Add new property feature coming soon!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 
 
@@ -165,10 +228,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildCurrentScreenAppBar() {
-    if (_showSearchScreen) {
-      return _buildAppBar('Search Properties');
-    }
-
     switch (_currentBottomNavIndex) {
       case 0:
         return Column(
@@ -180,19 +239,15 @@ class _HomeScreenState extends State<HomeScreen> {
       case 1:
         return _buildAppBar('Shortlists');
       case 3:
-        return _buildAppBar('Inbox', showSearchIcon: true);
+        return _buildAppBar('Inbox');
       case 4:
-        return _buildAppBar('Profile', showEditIcon: true);
+        return _buildAppBar('Profile');
       default:
         return const SizedBox.shrink();
     }
   }
 
   Widget _buildCurrentScreenBody() {
-    if (_showSearchScreen) {
-      return const SearchScreenContent();
-    }
-
     switch (_currentBottomNavIndex) {
       case 0:
         return _buildHomeContent();
@@ -207,52 +262,19 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _buildAppBar(String title, {bool showSearchIcon = false, bool showEditIcon = false}) {
+
+  Widget _buildAppBar(String title) {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
+      centerTitle: true,
       title: Text(
         title,
         style: const TextStyle(
           color: Colors.black,
-          fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
       ),
-      centerTitle: true,
-      leading: _showSearchScreen || _currentBottomNavIndex != 0
-          ? IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () {
-                setState(() {
-                  if (_showSearchScreen) {
-                    _showSearchScreen = false;
-                  } else {
-                    _currentBottomNavIndex = 0;
-                  }
-                });
-              },
-            )
-          : null,
-      actions: showSearchIcon
-          ? [
-              IconButton(
-                icon: const Icon(Icons.search, color: Colors.black),
-                onPressed: () {
-                  // Handle search
-                },
-              ),
-            ]
-          : showEditIcon
-              ? [
-                  IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.black),
-                    onPressed: () {
-                      // Handle edit profile
-                    },
-                  ),
-                ]
-              : null,
     );
   }
 
@@ -282,7 +304,7 @@ class _HomeScreenState extends State<HomeScreen> {
             // Navigate to newly added properties page
           }),
           const SizedBox(height: 12),
-          _buildPropertyList(_newlyAddedProperties),
+          _buildPropertyList(_filteredNewlyAdded),
           const SizedBox(height: 20),
         ],
       ),
@@ -295,96 +317,76 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Location
           Row(
             children: [
-              const Icon(
-                Icons.location_on,
-                color: Colors.red,
-                size: 20,
-              ),
-              const SizedBox(width: 4),
-              const Text(
-                'noida bhutani tower, india',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(width: 4),
-              const Icon(
-                Icons.keyboard_arrow_down,
-                size: 20,
+              const Icon(Icons.location_on, color: Colors.red),
+              const SizedBox(width: 6),
+              _isLocationLoading
+                  ? const Text("Detecting location...")
+                  : Text(
+                _currentLocation,
+                style: const TextStyle(fontWeight: FontWeight.w500),
               ),
             ],
           ),
-          // Notifications
-          GestureDetector(
-            onTap: () {
-              // Navigation code
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => NotificationScreen(),
+                  builder: (_) => NotificationScreen(),
                 ),
               );
             },
-            child: Stack(
-              children: [
-                const Icon(
-                  Icons.notifications_outlined,
-                  size: 24,
-                ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFFF6B35),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),
     );
   }
+  void _onSearchChanged(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filteredFeatured = List.from(_featuredProperties);
+        _filteredNewlyAdded = List.from(_newlyAddedProperties);
+      } else {
+        _filteredFeatured = _featuredProperties
+            .where((p) =>
+        p.title.toLowerCase().contains(query.toLowerCase()) ||
+            p.type.toLowerCase().contains(query.toLowerCase()))
+            .toList();
 
+        _filteredNewlyAdded = _newlyAddedProperties
+            .where((p) =>
+        p.title.toLowerCase().contains(query.toLowerCase()) ||
+            p.type.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      }
+    });
+  }
+
+
+  // 🔍 SEARCH → NEW PAGE
   Widget _buildSearchBar() {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _showSearchScreen = true;
-        });
-      },
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: const Color(0xFFE8F5E9), // Light green
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.search, color: Colors.grey),
-            const SizedBox(width: 12),
-            Text(
-              'Search',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 16,
-              ),
-            ),
-          ],
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8F5E9),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: _onSearchChanged,
+        decoration: const InputDecoration(
+          icon: Icon(Icons.search),
+          hintText: "Search properties...",
+          border: InputBorder.none,
         ),
       ),
     );
   }
+
 
   Widget _buildPropertyCategories() {
     return SizedBox(

@@ -1,7 +1,39 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-class MyProfileScreen extends StatelessWidget {
+import 'package:dtbroker/profile/how_it_works_page.dart';
+import 'package:dtbroker/profile/my_deals_page.dart';
+import 'package:dtbroker/profile/my_posted_properties_page.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../profile/AboutAppPage.dart';
+import '../profile/My_information_page.dart';
+import '../profile/support_page.dart';
+
+class MyProfileScreen extends StatefulWidget {
   const MyProfileScreen({super.key});
+
+  @override
+  State<MyProfileScreen> createState() => _MyProfileScreenState();
+}
+
+class _MyProfileScreenState extends State<MyProfileScreen> {
+  File? _profileImage;
+  final ImagePicker _picker = ImagePicker();
+
+  // 📷 Open Camera
+  Future<void> _openCamera() async {
+    final XFile? photo = await _picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 80,
+    );
+
+    if (photo != null) {
+      setState(() {
+        _profileImage = File(photo.path);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,27 +67,32 @@ class MyProfileScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(3),
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Color(0xFF2D5016), // green border
+                    color: Color(0xFF2D5016),
                   ),
-                  child: const CircleAvatar(
+                  child: CircleAvatar(
                     radius: 55,
-                    backgroundImage:
-                    AssetImage('assets/images/homeimg.png'),
+                    backgroundImage: _profileImage != null
+                        ? FileImage(_profileImage!)
+                        : const AssetImage('assets/images/homeimg.png')
+                    as ImageProvider,
                   ),
                 ),
                 Positioned(
                   bottom: 6,
                   right: 6,
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.camera_alt,
-                      size: 18,
-                      color: Color(0xFF2D5016),
+                  child: GestureDetector(
+                    onTap: _openCamera,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt,
+                        size: 18,
+                        color: Color(0xFF2D5016),
+                      ),
                     ),
                   ),
                 ),
@@ -77,19 +114,42 @@ class MyProfileScreen extends StatelessWidget {
 
             // ---------- MENU LIST ----------
             _menuItem(
-              icon: Icons.person_outline,
+              icon: Icons.info_outline,
               title: 'My Information',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const MyInformationPage(),
+                  ),
+                );
+              },
             ),
+
             _menuItem(
               icon: Icons.home_work_outlined,
               title: 'My Posted Properties',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const MyPostedPropertiesPage(),
+                  ),
+                );
+              },
             ),
+
             _menuItem(
               icon: Icons.handshake_outlined,
               title: 'My Deals',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const MyDealsPage(),
+                  ),
+                );
+              },
             ),
 
             const SizedBox(height: 16),
@@ -97,17 +157,40 @@ class MyProfileScreen extends StatelessWidget {
             _menuItem(
               icon: Icons.help_outline,
               title: 'How it Works',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const HowItWorksPage(),
+                  ),
+                );
+              },
             ),
+
             _menuItem(
               icon: Icons.support_agent_outlined,
               title: 'Support',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SupportPage(),
+                  ),
+                );
+              },
             ),
+
             _menuItem(
               icon: Icons.info_outline,
               title: 'About',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AboutAppPage(),
+                  ),
+                );
+              },
             ),
 
             const SizedBox(height: 24),
@@ -132,14 +215,14 @@ class MyProfileScreen extends StatelessWidget {
             Container(
               width: 36,
               height: 36,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8F5E9),
+              decoration: const BoxDecoration(
+                color: Color(0xFFE8F5E9),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
                 size: 18,
-                color: const Color(0xFF2D5016),
+                color: Color(0xFF2D5016),
               ),
             ),
             const SizedBox(width: 16),

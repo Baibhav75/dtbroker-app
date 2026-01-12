@@ -9,6 +9,7 @@ import 'inbox_screen.dart';
 import 'profile_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,8 +21,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentBottomNavIndex = 0;
 
-  final TextEditingController _searchController = TextEditingController();
 
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _searchDebounce;
   List<Property> _filteredFeatured = [];
   List<Property> _filteredNewlyAdded = [];
 
@@ -35,6 +37,13 @@ class _HomeScreenState extends State<HomeScreen> {
     _getLiveLocation();
     _filteredFeatured = List.from(_featuredProperties);
     _filteredNewlyAdded = List.from(_newlyAddedProperties);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchDebounce?.cancel();
+    super.dispose();
   }
 
   // ================= LOCATION FUNCTION =================
@@ -297,8 +306,9 @@ class _HomeScreenState extends State<HomeScreen> {
             // Navigate to featured properties page
           }),
           const SizedBox(height: 12),
-          _buildPropertyList(_featuredProperties),
-          const SizedBox(height: 24),
+        _buildPropertyList(_filteredFeatured),
+
+        const SizedBox(height: 24),
           // Newly Added Property Section
           _buildSectionHeader('Newly added Property', () {
             // Navigate to newly added properties page
@@ -345,25 +355,34 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
   void _onSearchChanged(String query) {
-    setState(() {
-      if (query.isEmpty) {
-        _filteredFeatured = List.from(_featuredProperties);
-        _filteredNewlyAdded = List.from(_newlyAddedProperties);
-      } else {
-        _filteredFeatured = _featuredProperties
-            .where((p) =>
-        p.title.toLowerCase().contains(query.toLowerCase()) ||
-            p.type.toLowerCase().contains(query.toLowerCase()))
-            .toList();
+    if (_searchDebounce?.isActive ?? false) _searchDebounce!.cancel();
 
-        _filteredNewlyAdded = _newlyAddedProperties
-            .where((p) =>
-        p.title.toLowerCase().contains(query.toLowerCase()) ||
-            p.type.toLowerCase().contains(query.toLowerCase()))
-            .toList();
-      }
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      final searchText = query.toLowerCase().trim();
+
+      setState(() {
+        if (searchText.isEmpty) {
+          _filteredFeatured = List.from(_featuredProperties);
+          _filteredNewlyAdded = List.from(_newlyAddedProperties);
+          return;
+        }
+
+        bool matches(Property p) {
+          return p.title.toLowerCase().contains(searchText) ||
+              p.type.toLowerCase().contains(searchText) ||
+              p.address.toLowerCase().contains(searchText) ||
+              p.tag.toLowerCase().contains(searchText);
+        }
+
+        _filteredFeatured =
+            _featuredProperties.where(matches).toList();
+
+        _filteredNewlyAdded =
+            _newlyAddedProperties.where(matches).toList();
+      });
     });
   }
+
 
 
   // 🔍 SEARCH → NEW PAGE
@@ -378,14 +397,25 @@ class _HomeScreenState extends State<HomeScreen> {
       child: TextField(
         controller: _searchController,
         onChanged: _onSearchChanged,
-        decoration: const InputDecoration(
-          icon: Icon(Icons.search),
-          hintText: "Search properties...",
+        textInputAction: TextInputAction.search,
+        decoration: InputDecoration(
+          icon: const Icon(Icons.search),
+          hintText: "Search by name, type, location...",
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () {
+              _searchController.clear();
+              _onSearchChanged('');
+            },
+          )
+              : null,
           border: InputBorder.none,
         ),
       ),
     );
   }
+
 
 
   Widget _buildPropertyCategories() {

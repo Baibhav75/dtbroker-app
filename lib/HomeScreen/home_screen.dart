@@ -1,5 +1,8 @@
 import 'package:dtbroker/HomeScreen/notification_screen.dart';
 import 'package:dtbroker/HomeScreen/search_screen.dart';
+import 'package:dtbroker/HomeScreen/seeAllListPage.dart';
+import 'package:dtbroker/HomeScreen/property_detail_screen.dart';
+import 'package:dtbroker/HomeScreen/widgets/recommended_card.dart';
 import 'package:flutter/material.dart';
 import 'models/property_model.dart';
 import 'widgets/banner_carousel.dart';
@@ -11,6 +14,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'dart:async';
 
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -20,12 +24,15 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentBottomNavIndex = 0;
+  int _selectedCategoryIndex = 0; // default selected (House)
 
 
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounce;
   List<Property> _filteredFeatured = [];
   List<Property> _filteredNewlyAdded = [];
+  List<Property> _recommendedProperties = [];
+
 
   // 📍 LIVE LOCATION STATE
   String _currentLocation = "Detecting location...";
@@ -37,6 +44,9 @@ class _HomeScreenState extends State<HomeScreen> {
     _getLiveLocation();
     _filteredFeatured = List.from(_featuredProperties);
     _filteredNewlyAdded = List.from(_newlyAddedProperties);
+    _recommendedProperties = List.from(_featuredProperties.reversed);
+    // 👇 NEW
+
   }
 
   @override
@@ -91,40 +101,49 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
-
-  // Sample banner data
-  final List<BannerItem> _banners = [
-    BannerItem(
-      id: '1',
-      imageUrl: 'assets/images/homeimg.png',
-      title: 'FIND YOUR DREAM HOME',
-      subtitle: 'YOUR DREAM COME TRUE',
-      description1:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Quis ipsum suspendisse',
-      description2:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Quis ipsum suspendisse',
+  void _filterPropertiesByCategory(String categoryName) {
+    setState(() {
+      if (categoryName.toLowerCase() == 'house') {
+        _filteredFeatured =
+            _featuredProperties.where((p) => p.type == 'House').toList();
+        _filteredNewlyAdded =
+            _newlyAddedProperties.where((p) => p.type == 'House').toList();
+      } else if (categoryName.toLowerCase() == 'apartment') {
+        _filteredFeatured =
+            _featuredProperties.where((p) => p.type == 'Apartment').toList();
+        _filteredNewlyAdded =
+            _newlyAddedProperties.where((p) => p.type == 'Apartment').toList();
+      } else if (categoryName.toLowerCase() == 'villa') {
+        _filteredFeatured =
+            _featuredProperties.where((p) => p.type == 'Villa').toList();
+        _filteredNewlyAdded =
+            _newlyAddedProperties.where((p) => p.type == 'Villa').toList();
+      } else {
+        // fallback → show all
+        _filteredFeatured = List.from(_featuredProperties);
+        _filteredNewlyAdded = List.from(_newlyAddedProperties);
+      }
+    });
+  }
+  final List<CityItem> cities = [
+    CityItem(
+      name: 'Delhi / NCR',
+      image: 'https://images.unsplash.com/photo-1587474260584-136574528ed5',
     ),
-    BannerItem(
-      id: '2',
-      imageUrl: 'assets/images/testimagelogo.png',
-      title: 'FIND YOUR DREAM HOME',
-      subtitle: 'YOUR DREAM COME TRUE',
-      description1:
-          'Discover amazing properties with the best locations and prices.',
-      description2:
-          'Get personalized recommendations based on your preferences.',
+    CityItem(
+      name: 'Mumbai',
+      image: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f',
     ),
-    BannerItem(
-      id: '3',
-      imageUrl: 'assets/images/bookimg.png',
-      title: 'FIND YOUR DREAM HOME',
-      subtitle: 'YOUR DREAM COME TRUE',
-      description1:
-      'Discover amazing properties with the best locations and prices.',
-      description2:
-      'Get personalized recommendations based on your preferences.',
+    CityItem(
+      name: 'Bangalore',
+      image: 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2',
+    ),
+    CityItem(
+      name: 'Hyderabad',
+      image: 'https://images.unsplash.com/photo-1600788910554-5f2a7d63f42c',
     ),
   ];
+
 
   // Property categories
   final List<PropertyCategory> _categories = [
@@ -145,34 +164,92 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
     PropertyCategory(
       id: '4',
-      name: 'plot',
-      icon: Icons.house,
+      name: 'Plot',
+      icon: Icons.house_siding,
     ),
   ];
+
+
 
   // Featured properties
   final List<Property> _featuredProperties = [
     Property(
       id: '1',
-      title: "The Rao's villa",
+      title: "Luxury Villa",
       type: 'Villa',
-      address: '2925 Woodside Road, California',
-      rating: 4.5,
-      price: '₹2990',
-      imageUrl: 'assets/images/homeimg.png',
+      address: 'Beverly Hills, California',
+      rating: 4.9,
+      price: '₹45,000',
+      imageUrl: 'assets/images/Buyingimage.png',
       tag: 'Rent',
+      bedrooms: 4,
+      bathrooms: 3,
+      areaSqft: 2400,
+      ownerName: 'Rahul Sharma',
+      ownerLogo: 'assets/images/Buyingimage.png',
     ),
     Property(
       id: '2',
-      title: 'Homestay Apartment',
+      title: 'Modern Apartment',
       type: 'Apartment',
-      address: 'Columbia Road, California',
-      rating: 4.5,
-      price: '₹2990',
+      address: 'Downtown LA, California',
+      rating: 4.7,
+      price: '₹32,000',
+      imageUrl: 'assets/images/Buyingimage.png',
+      tag: 'Rent',
+      bedrooms: 3,
+      bathrooms: 2,
+      areaSqft: 1800,ownerName: 'Rahul Sharma',
+      ownerLogo: 'assets/images/owner1.png',
+
+    ),
+    Property(
+      id: '3',
+      title: 'Family House',
+      type: 'House',
+      address: 'San Jose, California',
+      rating: 4.6,
+      price: '₹28,000',
+      imageUrl: 'assets/images/homeimg.png',
+      tag: 'Sale',
+      bedrooms: 4,
+      bathrooms: 3,
+      areaSqft: 2100,
+      ownerName: 'Rahul Sharma',
+      ownerLogo: 'assets/images/owner1.png',
+    ),
+    Property(
+      id: '4',
+      title: 'City View Apartment',
+      type: 'Apartment',
+      address: 'San Francisco, California',
+      rating: 4.8,
+      price: '₹40,000',
       imageUrl: 'assets/images/homeimg.png',
       tag: 'Rent',
+      bedrooms: 2,
+      bathrooms: 2,
+      areaSqft: 1500,
+      ownerName: 'Rahul Sharma',
+      ownerLogo: 'assets/images/owner1.png',
+    ),
+    Property(
+      id: '5',
+      title: 'Premium Villa',
+      type: 'Villa',
+      address: 'Palo Alto, California',
+      rating: 5.0,
+      price: '₹60,000',
+      imageUrl: 'assets/images/homeimg.png',
+      tag: 'Sale',
+      bedrooms: 5,
+      bathrooms: 4,
+      areaSqft: 3200,
+      ownerName: 'Rahul Sharma',
+      ownerLogo: 'assets/images/owner1.png',
     ),
   ];
+
 
   // Newly added properties
   final List<Property> _newlyAddedProperties = [
@@ -185,6 +262,12 @@ class _HomeScreenState extends State<HomeScreen> {
       price: '₹2990',
       imageUrl: 'assets/images/homeimg.png',
       tag: 'Rent',
+      bedrooms: 5,
+      bathrooms: 4,
+      areaSqft: 3200,
+      ownerName: 'Rahul Sharma',
+      ownerLogo: 'assets/images/owner1.png',
+
     ),
     Property(
       id: '4',
@@ -195,6 +278,11 @@ class _HomeScreenState extends State<HomeScreen> {
       price: '₹2990',
       imageUrl: 'assets/images/homeimg.png',
       tag: 'Rent',
+      bedrooms: 5,
+      bathrooms: 4,
+      areaSqft: 3200,
+      ownerName: 'Rahul Sharma',
+      ownerLogo: 'assets/images/owner1.png',
     ),
   ];
 
@@ -214,12 +302,11 @@ class _HomeScreenState extends State<HomeScreen> {
       _currentBottomNavIndex = index;
     });
   }
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      drawer: _buildDrawer(), // ✅ ADD THIS
       body: SafeArea(
         child: Column(
           children: [
@@ -235,7 +322,6 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: _buildBottomNavigation(),
     );
   }
-
   Widget _buildCurrentScreenAppBar() {
     switch (_currentBottomNavIndex) {
       case 0:
@@ -271,7 +357,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-
   Widget _buildAppBar(String title) {
     return AppBar(
       backgroundColor: Colors.white,
@@ -293,18 +378,25 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Banner Carousel
-          BannerCarousel(
-            banners: _banners,
-            height: 200,
-          ),
+
           const SizedBox(height: 20),
           // Property Categories
           _buildPropertyCategories(),
           const SizedBox(height: 24),
           // Featured Property Section
           _buildSectionHeader('Featured Property', () {
-            // Navigate to featured properties page
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => FeatureListScreen(
+                  title: 'Featured Property',
+                  properties: _filteredFeatured,
+                ),
+              ),
+
+            );
           }),
+
           const SizedBox(height: 12),
         _buildPropertyList(_filteredFeatured),
 
@@ -315,33 +407,340 @@ class _HomeScreenState extends State<HomeScreen> {
           }),
           const SizedBox(height: 12),
           _buildPropertyList(_filteredNewlyAdded),
+          
+          const SizedBox(height: 24),
+          // Recommended For You Section
+          _buildSectionHeader('Recommended For You', () {
+             Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => FeatureListScreen(
+                  title: 'Recommended For You',
+                  properties: _recommendedProperties,
+                ),
+              ),
+            );
+          }),
+          const SizedBox(height: 12),
+          const SizedBox(height: 12),
+          _buildRecommendedList(_recommendedProperties),
+          
           const SizedBox(height: 20),
-        ],
+      SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+
+            // 🔹 EXPLORE POPULAR CITIES
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Explore popular cities',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Buy or Rent properties in top cities',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+        SizedBox(
+          height: 120,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: cities.length,
+            itemBuilder: (context, index) {
+              final city = cities[index];
+
+              return Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Column(
+                  children: [
+                    ClipOval(
+                      child: Image.network(
+                        city.image,
+                        width: 72,
+                        height: 72,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return SizedBox(
+                            width: 72,
+                            height: 72,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                value:
+                                loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                    : null,
+                              ),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 72,
+                            height: 72,
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.location_city),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      city.name,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+
+
+        const SizedBox(height: 24),
+
+            // 🔹 BUYING COMMERCIAL PROPERTY
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Buying a commercial property',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Shops, offices, land, factories, warehouses and more',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  'assets/images/Buyingimage.png',
+                  height: 180,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  Text(
+                    'Explore all commercial buying options',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Icon(Icons.arrow_forward),
+                ],
+              ),
+            ),
+
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Text(
+                'Over 79,000 properties and 9,500 projects',
+                style: TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // 🔹 TOP ARTICLES
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: const [
+                  Icon(Icons.article_outlined),
+                  SizedBox(width: 8),
+                  Text(
+                    'Top articles on commercial buying',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Text(
+                'Know more about latest realty trends',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // 🔹 TABS
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Wrap(
+                spacing: 16,
+                children: const [
+                  Text('News', style: TextStyle(fontWeight: FontWeight.w600)),
+                  Text('Tax & Legal'),
+                  Text('Help Guides'),
+                  Text('Investment'),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+          ],
+        ),
+      )
+
+
+      ],
       ),
     );
   }
 
-  Widget _buildTopNavigation() {
-    return Padding(
+  Widget _buildTopNavigation({bool isDarkMode = false}) {
+    final bgColor = isDarkMode ? const Color(0xFF121212) : Colors.white;
+    final textColor = isDarkMode ? Colors.white : Colors.black;
+    final subTextColor = isDarkMode ? Colors.white70 : Colors.black87;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: bgColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDarkMode ? 0.4 : 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // ☰ MENU + LOCATION
           Row(
             children: [
-              const Icon(Icons.location_on, color: Colors.red),
-              const SizedBox(width: 6),
-              _isLocationLoading
-                  ? const Text("Detecting location...")
-                  : Text(
-                _currentLocation,
-                style: const TextStyle(fontWeight: FontWeight.w500),
+              // ☰ Drawer Button
+              Builder(
+                builder: (context) => InkWell(
+                  borderRadius: BorderRadius.circular(10),
+                  onTap: () => Scaffold.of(context).openDrawer(),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: isDarkMode
+                          ? Colors.white10
+                          : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      Icons.menu_open_rounded,
+                      color: textColor,
+                      size: 22,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              // 📍 LOCATION (ANIMATED)
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (child, animation) {
+                  return SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 0.4),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: FadeTransition(opacity: animation, child: child),
+                  );
+                },
+                child: Container(
+                  key: ValueKey(_currentLocation),
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 4),
+                      _isLocationLoading
+                          ? const Text(
+                        "Detecting...",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      )
+                          : Text(
+                        _currentLocation,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: subTextColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
+
+          // 👤 PROFILE AVATAR + 🔴 NOTIFICATION BADGE
+          GestureDetector(
+            onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -349,11 +748,49 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               );
             },
+            child: Stack(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor:
+                  isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                  backgroundImage:
+                  const AssetImage('assets/images/profile.png'),
+                  child: const Icon(Icons.person, color: Colors.grey),
+                ),
+
+                // 🔴 NOTIFICATION BADGE
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Container(
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: bgColor, width: 2),
+                    ),
+                    child: const Text(
+                      '3', // 🔔 notification count
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+
+
+
   void _onSearchChanged(String query) {
     if (_searchDebounce?.isActive ?? false) _searchDebounce!.cancel();
 
@@ -416,63 +853,117 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
-
   Widget _buildPropertyCategories() {
     return SizedBox(
-      height: 100,
-      child: ListView.builder(
+      height: 80,
+      child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 18),
         itemCount: _categories.length,
+        separatorBuilder: (_, __) => const SizedBox(width:28),
         itemBuilder: (context, index) {
           final category = _categories[index];
-          return _buildCategoryItem(category);
+          final isSelected = index == _selectedCategoryIndex;
+
+          return _buildCategoryItem(category, index, isSelected);
         },
       ),
     );
   }
 
-  Widget _buildCategoryItem(PropertyCategory category) {
+
+  Widget _buildCategoryItem(
+      PropertyCategory category,
+      int index,
+      bool isSelected,
+      ) {
     return GestureDetector(
       onTap: () {
-        // Handle category tap
+        setState(() {
+          _selectedCategoryIndex = index;
+        });
+        _filterPropertiesByCategory(category.name);
       },
-      child: Container(
-        width: 80,
-        margin: const EdgeInsets.only(right: 16),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+        width: 90,
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          gradient: isSelected
+              ? const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFEAF4FF),
+              Color(0xFFD6E8FF),
+            ],
+          )
+              : const LinearGradient(
+            colors: [Colors.white, Colors.white],
+          ),
+          boxShadow: [
+            if (isSelected)
+              BoxShadow(
+                color: Colors.blue.withOpacity(0.25),
+                blurRadius: 14,
+                offset: const Offset(0, 8),
+              )
+            else
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 6,
+                offset: const Offset(0, 3),
+              ),
+          ],
+          border: Border.all(
+            color: isSelected
+                ? Colors.blue.withOpacity(0.4)
+                : Colors.grey.withOpacity(0.2),
+          ),
+        ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8F5E9), // Light green
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0xFF2D5016), // Dark green
-                  width: 2,
+            // 🔥 Icon Animation
+            AnimatedScale(
+              duration: const Duration(milliseconds: 300),
+              scale: isSelected ? 1.25 : 1.0,
+              child: AnimatedSlide(
+                duration: const Duration(milliseconds: 300),
+                offset: isSelected ? const Offset(0, -0.05) : Offset.zero,
+                child: Icon(
+                  category.icon,
+                  size: 30,
+                  color: isSelected
+                      ? const Color(0xFF1E88E5)
+                      : Colors.black54,
                 ),
               ),
-              child: Icon(
-                category.icon,
-                color: const Color(0xFF2D5016), // Dark green
-                size: 28,
-              ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              category.name,
-              style: const TextStyle(
+
+            const SizedBox(height: 10),
+
+            // 🔤 Text Animation
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 300),
+              style: TextStyle(
                 fontSize: 12,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
+                color: isSelected
+                    ? const Color(0xFF1E88E5)
+                    : Colors.black54,
               ),
+              child: Text(category.name),
             ),
           ],
         ),
       ),
     );
   }
+
+
 
   Widget _buildSectionHeader(String title, VoidCallback onSeeAll) {
     return Padding(
@@ -487,13 +978,20 @@ class _HomeScreenState extends State<HomeScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          GestureDetector(
+
+          // ✅ InkWell added
+          InkWell(
             onTap: onSeeAll,
-            child: const Text(
-              'See all',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.black87,
+            borderRadius: BorderRadius.circular(6),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              child: Text(
+                'See all',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.blue,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ),
@@ -502,9 +1000,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+
   Widget _buildPropertyList(List<Property> properties) {
     return SizedBox(
-      height: 320,
+      height: 340,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -513,8 +1012,55 @@ class _HomeScreenState extends State<HomeScreen> {
           return PropertyCard(
             property: properties[index],
             onTap: () {
-              // Handle property tap - navigate to detail page
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PropertyDetailScreen(
+                    property: properties[index],
+                  ),
+                ),
+              );
             },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildRecommendedList(List<Property> properties) {
+    return SizedBox(
+      height: 290, // Increased height to prevent overflow
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: properties.length,
+        itemBuilder: (context, index) {
+          return TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutQuart,
+            builder: (context, value, child) {
+              return Transform.translate(
+                offset: Offset(0, 30 * (1 - value)), // Slide up
+                child: Opacity(
+                  opacity: value,
+                  child: child,
+                ),
+              );
+            },
+            child: RecommendedCard(
+              property: properties[index],
+              onTap: () {
+                 Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PropertyDetailScreen(
+                      property: properties[index],
+                    ),
+                  ),
+                );
+              },
+            ),
           );
         },
       ),
@@ -598,5 +1144,84 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  Widget _buildDrawer() {
+    return Drawer(
+      child: Column(
+        children: [
+          DrawerHeader(
+            decoration: const BoxDecoration(
+              color: Color(0xFF2D5016), // Dark green
+            ),
+            child: Row(
+              children: const [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.person, size: 32),
+                ),
+                SizedBox(width: 12),
+                Text(
+                  'Welcome User',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          _drawerItem(Icons.home, 'Home', () {
+            Navigator.pop(context);
+          }),
+
+          _drawerItem(Icons.favorite, 'Shortlisted', () {
+            setState(() => _currentBottomNavIndex = 1);
+            Navigator.pop(context);
+          }),
+
+          _drawerItem(Icons.inbox, 'Inbox', () {
+            setState(() => _currentBottomNavIndex = 3);
+            Navigator.pop(context);
+          }),
+
+          _drawerItem(Icons.person, 'Profile', () {
+            setState(() => _currentBottomNavIndex = 4);
+            Navigator.pop(context);
+          }),
+
+
+          _drawerItem(Icons.logout, 'Logout', () {
+            Navigator.pop(context);
+            setState(() {
+              _currentBottomNavIndex = 0;
+            });
+          }),
+
+        ],
+      ),
+    );
+  }
+
+  Widget _drawerItem(IconData icon, String title, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      onTap: onTap,
+    );
+  }
+
 }
+
+class CityItem {
+  final String name;
+  final String image;
+
+  CityItem({required this.name, required this.image});
+}
+
+
+
 

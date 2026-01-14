@@ -1,3 +1,4 @@
+import 'package:dtbroker/loginScreen/forgot_password_page.dart';
 import 'package:flutter/material.dart';
 import 'package:dtbroker/HomeScreen/home_screen.dart';
 import 'login_mobile_page.dart';
@@ -117,7 +118,14 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ForgotPasswordPage(),
+                                ),
+                              );
+                            },
                             child: const Text("Forgot password?"),
                           ),
                         ),
@@ -157,7 +165,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                         OutlinedButton.icon(
                           onPressed: () {},
                           icon: const Icon(Icons.real_estate_agent),
-                          label: const Text("Agent Login"),
+                          label: const Text("user  Login"),
                           style: _outlineStyle(),
                         ),
 
@@ -173,7 +181,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                             );
                           },
                           icon: const Icon(Icons.developer_board),
-                          label: const Text("Developer Login"),
+                          label: const Text("Seller Login"),
                           style: _outlineStyle(),
                         ),
 

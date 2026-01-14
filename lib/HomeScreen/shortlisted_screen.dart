@@ -22,6 +22,11 @@ class _ShortlistedScreenContentState extends State<ShortlistedScreenContent> {
       price: '\$ 2290',
       imageUrl: 'assets/images/homeimg.png',
       tag: 'Rent',
+      bedrooms: 5,
+      bathrooms: 4,
+      areaSqft: 3200,
+      ownerName: 'Rahul Sharma',
+      ownerLogo: 'assets/images/owner1.png',
     ),
     Property(
       id: '2',
@@ -32,6 +37,11 @@ class _ShortlistedScreenContentState extends State<ShortlistedScreenContent> {
       price: '\$ 2890',
       imageUrl: 'assets/images/homeimg.png',
       tag: 'Rent',
+      bedrooms: 5,
+      bathrooms: 4,
+      areaSqft: 3200,
+      ownerName: 'Rahul Sharma',
+      ownerLogo: 'assets/images/owner1.png',
     ),
     Property(
       id: '3',
@@ -42,6 +52,11 @@ class _ShortlistedScreenContentState extends State<ShortlistedScreenContent> {
       price: '\$ 8290',
       imageUrl: 'assets/images/homeimg.png',
       tag: 'Rent',
+      bedrooms: 5,
+      bathrooms: 4,
+      areaSqft: 3200,
+      ownerName: 'Rahul Sharma',
+      ownerLogo: 'assets/images/owner1.png',
     ),
     Property(
       id: '4',
@@ -52,6 +67,11 @@ class _ShortlistedScreenContentState extends State<ShortlistedScreenContent> {
       price: '\$ 82909',
       imageUrl: 'assets/images/homeimg.png',
       tag: 'Rent',
+      bedrooms: 5,
+      bathrooms: 4,
+      areaSqft: 3200,
+      ownerName: 'Rahul Sharma',
+      ownerLogo: 'assets/images/owner1.png',
     ),
   ];
 
@@ -192,13 +212,17 @@ class _ShortlistedScreenContentState extends State<ShortlistedScreenContent> {
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.orange,
+                                  foregroundColor: Colors.black, // 👈 TEXT COLOR
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  textStyle: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                                 onPressed: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) =>const ChatPage(
-                                      ),
+                                      builder: (_) => const ChatPage(),
                                     ),
                                   );
                                 },
@@ -210,6 +234,11 @@ class _ShortlistedScreenContentState extends State<ShortlistedScreenContent> {
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.orange,
+                                  foregroundColor: Colors.black, // 👈 TEXT COLOR
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  textStyle: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                                 onPressed: () {
                                   Navigator.push(
@@ -226,6 +255,7 @@ class _ShortlistedScreenContentState extends State<ShortlistedScreenContent> {
                             ),
                           ],
                         ),
+
                       ],
                     ),
                   ),

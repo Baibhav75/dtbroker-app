@@ -8,7 +8,15 @@ class Property {
   final double rating;
   final String price;
   final String imageUrl;
-  final String tag; // "Rent" or "Sale"
+  final String tag; // Rent / Sale
+
+  // 🔹 NEW FIELDS
+  final int bedrooms;
+  final int bathrooms;
+  final int areaSqft;
+  // 👤 Owner details
+  final String ownerName;
+  final String ownerLogo; // asset path (later can be network)
 
   Property({
     required this.id,
@@ -19,8 +27,14 @@ class Property {
     required this.price,
     required this.imageUrl,
     required this.tag,
+    required this.bedrooms,
+    required this.bathrooms,
+    required this.areaSqft,
+    required this.ownerName,
+    required this.ownerLogo,
   });
 }
+
 
 class BannerItem {
   final String id;

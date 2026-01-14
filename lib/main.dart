@@ -1,7 +1,6 @@
 import 'package:dtbroker/splashScreen.dart';
 import 'package:flutter/material.dart';
 
-
 void main() {
   runApp(const DTBrokerApp());
 }

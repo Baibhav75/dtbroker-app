@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/property_model.dart';
 
 // Property Card Widget
-class PropertyCard extends StatelessWidget {
+class PropertyCard extends StatefulWidget {
   final Property property;
   final VoidCallback? onTap;
 
@@ -13,9 +13,39 @@ class PropertyCard extends StatelessWidget {
   });
 
   @override
+  State<PropertyCard> createState() => _PropertyCardState();
+}
+
+class _PropertyCardState extends State<PropertyCard> {
+  bool isFavorite = false;
+
+  // 🔹 INFO WIDGET (GREEN ICON + TEXT)
+  Widget _info(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: Colors.green,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Colors.green,
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Container(
         width: 280,
         margin: const EdgeInsets.only(right: 16),
@@ -34,7 +64,7 @@ class PropertyCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image with tag
+            // 🖼 IMAGE + HEART
             Stack(
               children: [
                 ClipRRect(
@@ -42,7 +72,7 @@ class PropertyCard extends StatelessWidget {
                     top: Radius.circular(12),
                   ),
                   child: Image.asset(
-                    property.imageUrl,
+                    widget.property.imageUrl,
                     width: double.infinity,
                     height: 180,
                     fit: BoxFit.cover,
@@ -55,42 +85,57 @@ class PropertyCard extends StatelessWidget {
                     },
                   ),
                 ),
+
+                // ❤️ Favorite Icon
                 Positioned(
                   top: 12,
                   right: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2D5016), // Dark green
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      property.tag,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        isFavorite = !isFavorite;
+                      });
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        isFavorite
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color:
+                        isFavorite ? Colors.red : Colors.grey,
+                        size: 20,
                       ),
                     ),
                   ),
                 ),
               ],
             ),
-            // Content
+
+            // 📄 CONTENT
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Title & Price
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
                         child: Text(
-                          property.title,
+                          widget.property.title,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -100,26 +145,32 @@ class PropertyCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        property.price,
+                        widget.property.price,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFFFF6B35), // Orange
+                          color: Color(0xFFFF6B35),
                         ),
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 4),
+
+                  // Property Type
                   Text(
-                    property.type,
+                    widget.property.type,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],
                     ),
                   ),
+
                   const SizedBox(height: 4),
+
+                  // Address
                   Text(
-                    property.address,
+                    widget.property.address,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],
@@ -127,24 +178,65 @@ class PropertyCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+
                   const SizedBox(height: 8),
+
+
+
+                  // 🛏 Beds | 🛁 Baths | 📐 Area
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 6,
+                    children: [
+                      _info(
+                        Icons.bed,
+                        '${widget.property.bedrooms} Beds',
+
+                      ),
+                      _info(
+                        Icons.bathtub,
+                        '${widget.property.bathrooms} Bath',
+                      ),
+                      _info(
+                        Icons.square_foot,
+                        '${widget.property.areaSqft} sqft',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // 👤 OWNER INFO (Name + Logo)
                   Row(
                     children: [
-                      const Icon(
-                        Icons.star,
-                        color: Color(0xFFFFD700), // Yellow
-                        size: 16,
+                      CircleAvatar(
+                        radius: 14,
+                        backgroundColor: Colors.grey[200],
+                        backgroundImage: AssetImage(
+                          widget.property.ownerLogo,
+                        ),
+                        onBackgroundImageError: (_, __) {},
+                        child: widget.property.ownerLogo.isEmpty
+                            ? const Icon(
+                          Icons.person,
+                          size: 16,
+                          color: Colors.grey,
+                        )
+                            : null,
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        property.rating.toString(),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          widget.property.ownerName,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
+
                 ],
               ),
             ),
@@ -154,6 +246,8 @@ class PropertyCard extends StatelessWidget {
     );
   }
 }
+
+
 
 // Shortlisted Property Card Widget
 class ShortlistedPropertyCard extends StatelessWidget {

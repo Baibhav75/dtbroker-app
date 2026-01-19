@@ -756,7 +756,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   isDarkMode ? Colors.white10 : Colors.grey.shade200,
                   backgroundImage:
                   const AssetImage('assets/images/profile.png'),
-                  child: const Icon(Icons.person, color: Colors.grey),
+                  child: const Icon(Icons.notification_add, color: Colors.black),
                 ),
 
                 // 🔴 NOTIFICATION BADGE
@@ -855,12 +855,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildPropertyCategories() {
     return SizedBox(
-      height: 80,
+      height: 75,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 18),
+        padding: const EdgeInsets.symmetric(horizontal:22),
         itemCount: _categories.length,
-        separatorBuilder: (_, __) => const SizedBox(width:28),
+        separatorBuilder: (_, __) => const SizedBox(width:18),
         itemBuilder: (context, index) {
           final category = _categories[index];
           final isSelected = index == _selectedCategoryIndex;
@@ -870,7 +870,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
 
   Widget _buildCategoryItem(
       PropertyCategory category,
@@ -943,8 +942,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            const SizedBox(height: 10),
-
             // 🔤 Text Animation
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 300),
@@ -961,6 +958,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+
   }
 
 
@@ -1072,93 +1070,100 @@ class _HomeScreenState extends State<HomeScreen> {
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 5,
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
             offset: const Offset(0, -2),
           ),
         ],
       ),
       child: BottomNavigationBar(
         currentIndex: _currentBottomNavIndex,
-        onTap: (index) {
-          _handleNavigation(index);
-        },
+        onTap: _handleNavigation,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF2D5016), // Dark green
-        unselectedItemColor: Colors.black54,
+        backgroundColor: Colors.white,
+        selectedItemColor: const Color(0xFF2D5016),
+        unselectedItemColor: Colors.grey,
+        showUnselectedLabels: true,
         items: [
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: _currentBottomNavIndex == 0
-                    ? const Color(0xFF2D5016).withOpacity(0.1)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.home),
-            ),
+          _navItem(
+            icon: Icons.home_outlined,
+            activeIcon: Icons.home,
             label: 'Home',
+            index: 0,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              _currentBottomNavIndex == 1
-                  ? Icons.favorite
-                  : Icons.favorite_border,
-            ),
+          _navItem(
+            icon: Icons.favorite_border,
+            activeIcon: Icons.favorite,
             label: 'Shortlisted',
+            index: 1,
           ),
+
+          /// 🔥 Center Add Button
           BottomNavigationBarItem(
             icon: Container(
-              width: 50,
-              height: 50,
+              width: 54,
+              height: 54,
               decoration: const BoxDecoration(
-                color: Color(0xFFFFD700), // Yellow
+                color: Color(0xFFFFD700),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.add,
-                color: Colors.black,
-              ),
+              child: const Icon(Icons.add, color: Colors.black, size: 28),
             ),
             label: '',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              _currentBottomNavIndex == 3
-                  ? Icons.inbox
-                  : Icons.inbox_outlined,
-            ),
+
+          _navItem(
+            icon: Icons.inbox_outlined,
+            activeIcon: Icons.inbox,
             label: 'Inbox',
+            index: 3,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              _currentBottomNavIndex == 4
-                  ? Icons.person
-                  : Icons.person_outline,
-            ),
+          _navItem(
+            icon: Icons.person_outline,
+            activeIcon: Icons.person,
             label: 'Profile',
+            index: 4,
           ),
         ],
       ),
     );
   }
+  BottomNavigationBarItem _navItem({
+    required IconData icon,
+    required IconData activeIcon,
+    required String label,
+    required int index,
+  }) {
+    return BottomNavigationBarItem(
+      icon: Icon(
+        _currentBottomNavIndex == index ? activeIcon : icon,
+      ),
+      label: label,
+    );
+  }
+
 
   Widget _buildDrawer() {
     return Drawer(
       child: Column(
         children: [
-          DrawerHeader(
+          // 🔹 HEADER
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(16, 40, 16, 20),
             decoration: const BoxDecoration(
-              color: Color(0xFF2D5016), // Dark green
+              color: Color(0xFF2D5016),
             ),
             child: Row(
               children: const [
                 CircleAvatar(
-                  radius: 30,
+                  radius: 32,
                   backgroundColor: Colors.white,
-                  child: Icon(Icons.person, size: 32),
+                  child: Icon(
+                    Icons.person,
+                    size: 36,
+                    color: Color(0xFF2D5016),
+                  ),
                 ),
                 SizedBox(width: 12),
                 Text(
@@ -1173,45 +1178,68 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          _drawerItem(Icons.home, 'Home', () {
+          const SizedBox(height: 6),
+
+          _drawerItem(Icons.home_outlined, 'Home', () {
             Navigator.pop(context);
           }),
 
-          _drawerItem(Icons.favorite, 'Shortlisted', () {
+          _drawerItem(Icons.favorite_border, 'Shortlisted', () {
             setState(() => _currentBottomNavIndex = 1);
             Navigator.pop(context);
           }),
 
-          _drawerItem(Icons.inbox, 'Inbox', () {
+          _drawerItem(Icons.inbox_outlined, 'Inbox', () {
             setState(() => _currentBottomNavIndex = 3);
             Navigator.pop(context);
           }),
 
-          _drawerItem(Icons.person, 'Profile', () {
+          _drawerItem(Icons.person_outline, 'Profile', () {
             setState(() => _currentBottomNavIndex = 4);
             Navigator.pop(context);
           }),
 
 
-          _drawerItem(Icons.logout, 'Logout', () {
-            Navigator.pop(context);
-            setState(() {
-              _currentBottomNavIndex = 0;
-            });
-          }),
+          _drawerItem(
+            Icons.logout,
+            'Logout',
+                () {
+              Navigator.pop(context);
+              setState(() => _currentBottomNavIndex = 0);
+            },
+            iconColor: Colors.red,
+            textColor: Colors.red,
+          ),
 
+          const SizedBox(height: 12),
         ],
       ),
     );
   }
 
-  Widget _drawerItem(IconData icon, String title, VoidCallback onTap) {
+
+  Widget _drawerItem(
+      IconData icon,
+      String title,
+      VoidCallback onTap, {
+        Color iconColor = Colors.black87,
+        Color textColor = Colors.black87,
+      }) {
     return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
+      leading: Icon(icon, color: iconColor),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
       onTap: onTap,
+      horizontalTitleGap: 12,
     );
   }
+
 
 }
 

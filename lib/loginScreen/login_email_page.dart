@@ -460,22 +460,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
 
   Widget _buildAlternativeLoginButtons() {
     return Column(
-      children: [
-        const SizedBox(height: 12),
-        _buildAlternativeButton(
-          icon: Icons.storefront_outlined,
-          label: 'Mobile login',
-          color: primaryColor,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const LoginMobilePage(),
-              ),
-            );
-          },
-        ),
-      ],
+
     );
   }
 

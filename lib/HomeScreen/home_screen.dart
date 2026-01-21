@@ -3,6 +3,7 @@ import 'package:dtbroker/HomeScreen/search_screen.dart';
 import 'package:dtbroker/HomeScreen/seeAllListPage.dart';
 import 'package:dtbroker/HomeScreen/property_detail_screen.dart';
 import 'package:dtbroker/HomeScreen/widgets/recommended_card.dart';
+import 'package:dtbroker/FlipCardLocationPage.dart';
 import 'package:flutter/material.dart';
 import 'models/property_model.dart';
 import 'widgets/banner_carousel.dart';
@@ -285,6 +286,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ownerLogo: 'assets/images/owner1.png',
     ),
   ];
+
+  String _currentAddress = "Vijay Nagar, MP";
+
+
+
 
   void _handleNavigation(int index) {
     if (index == 2) {
@@ -699,39 +705,101 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: FadeTransition(opacity: animation, child: child),
                   );
                 },
-                child: Container(
-                  key: ValueKey(_currentLocation),
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.location_on,
-                        color: Colors.red,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 4),
-                      _isLocationLoading
-                          ? const Text(
-                        "Detecting...",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      )
-                          : Text(
-                        _currentLocation,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: subTextColor,
+                child: GestureDetector(
+                  onTap: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => FlipCardLocationPage(
+                          currentLocation: _currentLocation,
+                          onLocationUpdated: (newLocation) {
+                            setState(() {
+                              _currentLocation = newLocation;
+                            });
+                          },
                         ),
                       ),
-                    ],
+                    );
+                  },
+                  child: Container(
+                    key: ValueKey(_currentLocation),
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Container(
+                      key: ValueKey('$_currentLocation$_currentAddress'),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.location_on,
+                            color: Colors.red,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 6),
+
+                          // 📍 LOCATION + ADDRESS (ROW WISE)
+                          _isLocationLoading
+                              ? const Text(
+                            "Detecting...",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          )
+                              : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _currentLocation,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Container(
+                                width: 4,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: subTextColor,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  _currentAddress,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: subTextColor,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(width: 6),
+                          const Icon(
+                            Icons.keyboard_arrow_down,
+                            color: Colors.red,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+
                   ),
                 ),
               ),

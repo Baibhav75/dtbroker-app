@@ -5,6 +5,12 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET"/>
 
+
+
+    <!-- GPS feature (optional but recommended) -->
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
     <application
         android:label="Nivesh Core"
         android:name="${applicationName}"

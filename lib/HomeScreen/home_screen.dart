@@ -187,7 +187,9 @@ class _HomeScreenState extends State<HomeScreen> {
       bathrooms: 3,
       areaSqft: 2400,
       ownerName: 'Rahul Sharma',
+      
       ownerLogo: 'assets/images/Buyingimage.png',
+      growthRate: '20% Growing',
     ),
     Property(
       id: '2',
@@ -202,6 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
       bathrooms: 2,
       areaSqft: 1800,ownerName: 'Rahul Sharma',
       ownerLogo: 'assets/images/owner1.png',
+      growthRate: '20% Growing',
 
     ),
     Property(
@@ -218,6 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
       areaSqft: 2100,
       ownerName: 'Rahul Sharma',
       ownerLogo: 'assets/images/owner1.png',
+      growthRate: '20% Growing',
     ),
     Property(
       id: '4',
@@ -387,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 20),
           // Property Categories
-          _buildPropertyCategories(),
+          //property Categories like Home , Pg, Rent, house
           const SizedBox(height: 24),
           // Featured Property Section
           _buildSectionHeader('Featured Property', () {
@@ -402,7 +406,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
             );
           }),
-
           const SizedBox(height: 12),
         _buildPropertyList(_filteredFeatured),
 
@@ -739,12 +742,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
-                            Icons.location_on,
-                            color: Colors.red,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 6),
+
+                          const SizedBox(width: 10),
 
                           // 📍 LOCATION + ADDRESS (ROW WISE)
                           _isLocationLoading
@@ -921,23 +920,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildPropertyCategories() {
-    return SizedBox(
-      height: 75,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal:22),
-        itemCount: _categories.length,
-        separatorBuilder: (_, __) => const SizedBox(width:18),
-        itemBuilder: (context, index) {
-          final category = _categories[index];
-          final isSelected = index == _selectedCategoryIndex;
 
-          return _buildCategoryItem(category, index, isSelected);
-        },
-      ),
-    );
-  }
 
   Widget _buildCategoryItem(
       PropertyCategory category,

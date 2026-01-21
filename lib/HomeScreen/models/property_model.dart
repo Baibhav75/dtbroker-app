@@ -9,14 +9,12 @@ class Property {
   final String price;
   final String imageUrl;
   final String tag; // Rent / Sale
-
-  // 🔹 NEW FIELDS
   final int bedrooms;
   final int bathrooms;
   final int areaSqft;
-  // 👤 Owner details
   final String ownerName;
-  final String ownerLogo; // asset path (later can be network)
+  final String ownerLogo;
+  final String? growthRate; // e.g. "20% growing"
 
   Property({
     required this.id,
@@ -32,9 +30,9 @@ class Property {
     required this.areaSqft,
     required this.ownerName,
     required this.ownerLogo,
+    this.growthRate,
   });
 }
-
 
 class BannerItem {
   final String id;
@@ -65,4 +63,3 @@ class PropertyCategory {
     required this.icon,
   });
 }
-

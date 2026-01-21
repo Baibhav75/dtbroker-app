@@ -648,3 +648,4 @@ class _FlipCardLocationPageState extends State<FlipCardLocationPage>
     );
   }
 }
+

@@ -389,10 +389,9 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           // Banner Carousel
 
-          const SizedBox(height: 20),
+
           // Property Categories
           //property Categories like Home , Pg, Rent, house
-          const SizedBox(height: 24),
           // Featured Property Section
           _buildSectionHeader('Featured Property', () {
             Navigator.push(
@@ -920,8 +919,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
-
   Widget _buildCategoryItem(
       PropertyCategory category,
       int index,
@@ -1011,8 +1008,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
   }
-
-
 
   Widget _buildSectionHeader(String title, VoidCallback onSeeAll) {
     return Padding(
@@ -1193,81 +1188,103 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
   Widget _buildDrawer() {
     return Drawer(
-      child: Column(
-        children: [
-          // 🔹 HEADER
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(16, 40, 16, 20),
-            decoration: const BoxDecoration(
-              color: Color(0xFF2D5016),
-            ),
-            child: Row(
-              children: const [
-                CircleAvatar(
-                  radius: 32,
-                  backgroundColor: Colors.white,
-                  child: Icon(
-                    Icons.person,
-                    size: 36,
-                    color: Color(0xFF2D5016),
-                  ),
+        child: Column(
+          children: [
+            // 🔹 HEADER
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 30, 20, 24),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFF2D5016),
+                    Color(0xFF3F7D20),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                SizedBox(width: 12),
-                Text(
-                  'Welcome User',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+              ),
+              child: Row(
+                children: const [
+                  CircleAvatar(
+                    radius: 34,
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      Icons.person,
+                      size: 38,
+                      color: Color(0xFF2D5016),
+                    ),
                   ),
-                ),
-              ],
+                  SizedBox(width: 14),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Welcome',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'User',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
             ),
-          ),
 
-          const SizedBox(height: 6),
+            const SizedBox(height: 8),
 
-          _drawerItem(Icons.home_outlined, 'Home', () {
-            Navigator.pop(context);
-          }),
-
-          _drawerItem(Icons.favorite_border, 'Shortlisted', () {
-            setState(() => _currentBottomNavIndex = 1);
-            Navigator.pop(context);
-          }),
-
-          _drawerItem(Icons.inbox_outlined, 'Inbox', () {
-            setState(() => _currentBottomNavIndex = 3);
-            Navigator.pop(context);
-          }),
-
-          _drawerItem(Icons.person_outline, 'Profile', () {
-            setState(() => _currentBottomNavIndex = 4);
-            Navigator.pop(context);
-          }),
-
-
-          _drawerItem(
-            Icons.logout,
-            'Logout',
-                () {
+            _drawerItem(Icons.home_outlined, 'Home', () {
               Navigator.pop(context);
-              setState(() => _currentBottomNavIndex = 0);
-            },
-            iconColor: Colors.red,
-            textColor: Colors.red,
-          ),
+            }),
 
-          const SizedBox(height: 12),
-        ],
-      ),
+            _drawerItem(Icons.favorite_border, 'Shortlisted', () {
+              setState(() => _currentBottomNavIndex = 1);
+              Navigator.pop(context);
+            }),
+
+            _drawerItem(Icons.inbox_outlined, 'Inbox', () {
+              setState(() => _currentBottomNavIndex = 3);
+              Navigator.pop(context);
+            }),
+
+            _drawerItem(Icons.person_outline, 'Profile', () {
+              setState(() => _currentBottomNavIndex = 4);
+              Navigator.pop(context);
+            }),
+
+            const Spacer(),
+
+            const Divider(thickness: 1),
+
+            _drawerItem(
+              Icons.logout,
+              'Logout',
+                  () {
+                Navigator.pop(context);
+                setState(() => _currentBottomNavIndex = 0);
+              },
+              iconColor: Colors.red,
+              textColor: Colors.red,
+            ),
+
+            const SizedBox(height: 12),
+          ],
+        ),
+
     );
   }
-
 
   Widget _drawerItem(
       IconData icon,
@@ -1276,18 +1293,27 @@ class _HomeScreenState extends State<HomeScreen> {
         Color iconColor = Colors.black87,
         Color textColor = Colors.black87,
       }) {
-    return ListTile(
-      leading: Icon(icon, color: iconColor),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: textColor,
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      child: ListTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
         ),
+        leading: Icon(icon, color: iconColor, size: 22),
+        title: Text(
+          title,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 15.5,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        onTap: onTap,
+        horizontalTitleGap: 10,
+        dense: true,
+        splashColor: Colors.green.withOpacity(0.15),
+        hoverColor: Colors.green.withOpacity(0.05),
       ),
-      onTap: onTap,
-      horizontalTitleGap: 12,
     );
   }
 

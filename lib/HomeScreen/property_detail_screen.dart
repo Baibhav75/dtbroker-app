@@ -514,7 +514,6 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
     );
   }
 }
-
 /// FACILITY ITEM WIDGET
 class _Facility extends StatelessWidget {
   final IconData icon;

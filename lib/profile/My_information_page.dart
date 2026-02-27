@@ -1,13 +1,24 @@
+import 'package:dtbroker/profile/edit_information_screen.dart';
 import 'package:flutter/material.dart';
+import '../controller/profile_get_controller.dart';
 
-class MyInformationPage extends StatelessWidget {
+class MyInformationPage extends StatefulWidget {
   const MyInformationPage({Key? key}) : super(key: key);
 
-  // ---------- USER DATA (replace with API later) ----------
-  static const String name = "Ankur Kumar";
-  static const String email = "ankur.kumar@email.com";
-  static const String phone = "+91 98765 43210";
-  static const String role = "Flutter Developer";
+  @override
+  State<MyInformationPage> createState() => _MyInformationPageState();
+}
+
+class _MyInformationPageState extends State<MyInformationPage> {
+
+
+  final ProfileController _controller = ProfileController();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.loadProfile();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,74 +27,114 @@ class MyInformationPage extends StatelessWidget {
         title: const Text("My Information"),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
+      body: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
 
-            // ---------- PROFILE IMAGE ----------
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.blue.shade100,
-              child: const Icon(
-                Icons.person,
-                size: 50,
-                color: Colors.blue,
-              ),
+          if (_controller.isLoading) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          final user = _controller.profile?.data;
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+
+                // ---------- PROFILE IMAGE ----------
+                CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Colors.blue.shade100,
+                  child: const Icon(
+                    Icons.person,
+                    size: 50,
+                    color: Colors.blue,
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // ---------- NAME ----------
+                Text(
+                  user?.name ?? "No Name",
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 4),
+
+                // ---------- ROLE (Optional Static) ----------
+                const Text(
+                  "User",
+                  style: TextStyle(color: Colors.grey),
+                ),
+
+                const SizedBox(height: 24),
+
+                // ---------- INFO CARDS ----------
+                _infoCard(
+                  icon: Icons.email,
+                  title: "Email",
+                  value: user?.email ?? "No Email",
+                ),
+
+                _infoCard(
+                  icon: Icons.phone,
+                  title: "Phone",
+                  value: user?.mobile ?? "No Phone",
+                ),
+
+                _infoCard(
+                  icon: Icons.location_city,
+                  title: "City",
+                  value: user?.city ?? "No City",
+                ),
+
+                _infoCard(
+                  icon: Icons.map,
+                  title: "State",
+                  value: user?.state ?? "No State",
+                ),
+
+                const SizedBox(height: 30),
+
+                // ---------- EDIT BUTTON ----------
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.edit),
+                    label: const Text("Edit Information"),
+                    onPressed: () async {
+
+                      final user = _controller.profile?.data;
+
+                      if (user == null) return;
+
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => EditInformationPage(
+                            profileData: user,
+                          ),
+                        ),
+                      );
+
+                      if (result == true) {
+                        _controller.loadProfile();
+                      }
+                    },
+                  ),
+                ),
+
+              ],
             ),
-
-            const SizedBox(height: 12),
-
-            // ---------- NAME ----------
-            const Text(
-              name,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 4),
-
-            // ---------- ROLE ----------
-            const Text(
-              role,
-              style: TextStyle(color: Colors.grey),
-            ),
-
-            const SizedBox(height: 24),
-
-            // ---------- INFO CARDS ----------
-            _infoCard(
-              icon: Icons.email,
-              title: "Email",
-              value: email,
-            ),
-            _infoCard(
-              icon: Icons.phone,
-              title: "Phone",
-              value: phone,
-            ),
-
-            const SizedBox(height: 30),
-
-            // ---------- EDIT BUTTON ----------
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.edit),
-                label: const Text("Edit Information"),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Edit feature coming soon"),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

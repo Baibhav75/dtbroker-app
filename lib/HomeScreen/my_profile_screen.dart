@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dtbroker/controller/profile_get_controller.dart';
 import 'package:dtbroker/profile/how_it_works_page.dart';
 import 'package:dtbroker/profile/my_deals_page.dart';
 import 'package:dtbroker/profile/my_posted_properties_page.dart';
@@ -18,8 +19,14 @@ class MyProfileScreen extends StatefulWidget {
 }
 
 class _MyProfileScreenState extends State<MyProfileScreen> {
+  final ProfileController _controller=ProfileController();
   File? _profileImage;
   final ImagePicker _picker = ImagePicker();
+
+  void initState(){
+    super.initState();
+    _controller.loadProfile();
+  }
 
   // 📷 Open Camera
   Future<void> _openCamera() async {
@@ -55,148 +62,158 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 24),
+        body: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, _) {
+              final user = _controller.profile?.data;
 
-            // ---------- PROFILE IMAGE ----------
-            Stack(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color(0xFF2D5016),
-                  ),
-                  child: CircleAvatar(
-                    radius: 55,
-                    backgroundImage: _profileImage != null
-                        ? FileImage(_profileImage!)
-                        : const AssetImage('assets/images/homeimg.png')
-                    as ImageProvider,
-                  ),
-                ),
-                Positioned(
-                  bottom: 6,
-                  right: 6,
-                  child: GestureDetector(
-                    onTap: _openCamera,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.camera_alt,
-                        size: 18,
-                        color: Color(0xFF2D5016),
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 24),
+
+                    // ---------- PROFILE IMAGE ----------
+                    Stack(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xFF2D5016),
+                          ),
+                          child: CircleAvatar(
+                            radius: 55,
+                            backgroundImage: _profileImage != null
+                                ? FileImage(_profileImage!)
+                                : const AssetImage('assets/images/homeimg.png')
+                            as ImageProvider,
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 6,
+                          right: 6,
+                          child: GestureDetector(
+                            onTap: _openCamera,
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.camera_alt,
+                                size: 18,
+                                color: Color(0xFF2D5016),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // ---------- DYNAMIC NAME ----------
+                    Text(
+                      user?.name ?? "Loading...",
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ),
+
+                    const SizedBox(height: 32),
+
+                    // ----- baaki menu same -----
+
+
+                    // ---------- MENU LIST ----------
+                    _menuItem(
+                      icon: Icons.info_outline,
+                      title: 'My Information',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MyInformationPage(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    _menuItem(
+                      icon: Icons.home_work_outlined,
+                      title: 'My Posted Properties',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MyPostedPropertiesPage(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    _menuItem(
+                      icon: Icons.handshake_outlined,
+                      title: 'My Deals',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MyDealsPage(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    _menuItem(
+                      icon: Icons.help_outline,
+                      title: 'How it Works',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const HowItWorksPage(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    _menuItem(
+                      icon: Icons.support_agent_outlined,
+                      title: 'Support',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const SupportPage(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    _menuItem(
+                      icon: Icons.info_outline,
+                      title: 'About',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AboutAppPage(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 24),
+                  ],
                 ),
-              ],
+              );
+            }
             ),
-
-            const SizedBox(height: 12),
-
-            // ---------- NAME ----------
-            const Text(
-              'Melissa Peters',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-
-            const SizedBox(height: 32),
-
-            // ---------- MENU LIST ----------
-            _menuItem(
-              icon: Icons.info_outline,
-              title: 'My Information',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const MyInformationPage(),
-                  ),
-                );
-              },
-            ),
-
-            _menuItem(
-              icon: Icons.home_work_outlined,
-              title: 'My Posted Properties',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const MyPostedPropertiesPage(),
-                  ),
-                );
-              },
-            ),
-
-            _menuItem(
-              icon: Icons.handshake_outlined,
-              title: 'My Deals',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const MyDealsPage(),
-                  ),
-                );
-              },
-            ),
-
-            const SizedBox(height: 16),
-
-            _menuItem(
-              icon: Icons.help_outline,
-              title: 'How it Works',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const HowItWorksPage(),
-                  ),
-                );
-              },
-            ),
-
-            _menuItem(
-              icon: Icons.support_agent_outlined,
-              title: 'Support',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const SupportPage(),
-                  ),
-                );
-              },
-            ),
-
-            _menuItem(
-              icon: Icons.info_outline,
-              title: 'About',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const AboutAppPage(),
-                  ),
-                );
-              },
-            ),
-
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
     );
   }
 

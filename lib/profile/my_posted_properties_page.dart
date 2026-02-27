@@ -1,3 +1,4 @@
+import 'package:dtbroker/profile/add_properties_screen.dart';
 import 'package:flutter/material.dart';
 
 class MyPostedPropertiesPage extends StatefulWidget {
@@ -10,6 +11,7 @@ class MyPostedPropertiesPage extends StatefulWidget {
 
 class _MyPostedPropertiesPageState
     extends State<MyPostedPropertiesPage> {
+
   // ---------------- DUMMY PROPERTIES ----------------
   List<Map<String, dynamic>> properties = [
     {
@@ -45,9 +47,28 @@ class _MyPostedPropertiesPageState
         title: const Text("My Posted Properties"),
         centerTitle: true,
       ),
+
       body: properties.isEmpty ? _emptyView() : _propertyList(),
+
+      // ================= FLOATING ACTION BUTTON =================
       floatingActionButton: FloatingActionButton(
-        onPressed: _addProperty,
+        onPressed: () async {
+
+          // 👇 Navigate to Add Property Screen
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AddPropertiesScreen(),
+            ),
+          );
+
+          // 👇 If new property added, refresh list (future ready)
+          if (result != null) {
+            setState(() {
+              properties.add(result);
+            });
+          }
+        },
         child: const Icon(Icons.add),
       ),
     );
@@ -89,9 +110,9 @@ class _MyPostedPropertiesPageState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ---------- HEADER ----------
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment:
+              MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
@@ -120,72 +141,66 @@ class _MyPostedPropertiesPageState
                 )
               ],
             ),
-
             const SizedBox(height: 8),
 
-            // ---------- LOCATION ----------
             Row(
               children: [
                 const Icon(Icons.location_on,
                     size: 16, color: Colors.grey),
                 const SizedBox(width: 4),
-                Text(
-                  property["location"],
-                  style: const TextStyle(color: Colors.grey),
-                ),
+                Text(property["location"],
+                    style:
+                    const TextStyle(color: Colors.grey)),
               ],
             ),
-
             const SizedBox(height: 6),
 
-            // ---------- PRICE ----------
             Row(
               children: [
                 const Icon(Icons.currency_rupee,
                     size: 16, color: Colors.grey),
                 const SizedBox(width: 4),
-                Text(
-                  property["price"],
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w600),
-                ),
+                Text(property["price"],
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600)),
               ],
             ),
-
             const SizedBox(height: 6),
 
-            // ---------- DATE ----------
             Row(
               children: [
                 const Icon(Icons.calendar_today,
                     size: 14, color: Colors.grey),
                 const SizedBox(width: 4),
-                Text(
-                  "Posted on ${property["date"]}",
-                  style: const TextStyle(color: Colors.grey),
-                ),
+                Text("Posted on ${property["date"]}",
+                    style:
+                    const TextStyle(color: Colors.grey)),
               ],
             ),
 
             const SizedBox(height: 12),
 
-            // ---------- ACTION BUTTONS ----------
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment:
+              MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: () => _viewProperty(property),
+                  onPressed: () =>
+                      _viewProperty(property),
                   child: const Text("View"),
                 ),
                 TextButton(
-                  onPressed: () => _editProperty(index),
+                  onPressed: () =>
+                      _editProperty(index),
                   child: const Text("Edit"),
                 ),
                 TextButton(
-                  onPressed: () => _deleteProperty(index),
+                  onPressed: () =>
+                      _deleteProperty(index),
                   child: const Text(
                     "Delete",
-                    style: TextStyle(color: Colors.red),
+                    style:
+                    TextStyle(color: Colors.red),
                   ),
                 ),
               ],
@@ -200,14 +215,16 @@ class _MyPostedPropertiesPageState
   Widget _emptyView() {
     return const Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment:
+        MainAxisAlignment.center,
         children: [
           Icon(Icons.home_work_outlined,
               size: 80, color: Colors.grey),
           SizedBox(height: 12),
           Text(
             "No properties posted yet",
-            style: TextStyle(color: Colors.grey, fontSize: 16),
+            style: TextStyle(
+                color: Colors.grey, fontSize: 16),
           ),
         ],
       ),
@@ -215,26 +232,41 @@ class _MyPostedPropertiesPageState
   }
 
   // ================= ACTIONS =================
-  void _viewProperty(Map<String, dynamic> property) {
+  void _viewProperty(
+      Map<String, dynamic> property) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text("Property Details"),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _detail("ID", property["id"]),
-            _detail("Title", property["title"]),
-            _detail("Location", property["location"]),
-            _detail("Price", property["price"]),
-            _detail("Status", property["status"]),
-            _detail("Date", property["date"]),
-          ],
+          crossAxisAlignment:
+          CrossAxisAlignment.start,
+          children: property.entries
+              .map((e) => Padding(
+            padding:
+            const EdgeInsets.only(
+                bottom: 6),
+            child: Row(
+              children: [
+                Text(
+                  "${e.key}: ",
+                  style: const TextStyle(
+                      fontWeight:
+                      FontWeight.bold),
+                ),
+                Expanded(
+                    child:
+                    Text(e.value)),
+              ],
+            ),
+          ))
+              .toList(),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () =>
+                Navigator.pop(context),
             child: const Text("Close"),
           )
         ],
@@ -243,7 +275,8 @@ class _MyPostedPropertiesPageState
   }
 
   void _editProperty(int index) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
       SnackBar(
         content: Text(
             "Edit property: ${properties[index]["title"]}"),
@@ -255,49 +288,31 @@ class _MyPostedPropertiesPageState
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Delete Property"),
+        title:
+        const Text("Delete Property"),
         content: const Text(
             "Are you sure you want to delete this property?"),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+            onPressed: () =>
+                Navigator.pop(context),
+            child:
+            const Text("Cancel"),
           ),
           TextButton(
             onPressed: () {
               setState(() {
-                properties.removeAt(index);
+                properties
+                    .removeAt(index);
               });
               Navigator.pop(context);
             },
             child: const Text(
               "Delete",
-              style: TextStyle(color: Colors.red),
+              style: TextStyle(
+                  color: Colors.red),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  void _addProperty() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Add Property screen coming soon"),
-      ),
-    );
-  }
-
-  Widget _detail(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        children: [
-          Text(
-            "$title: ",
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          Expanded(child: Text(value)),
         ],
       ),
     );

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../controller/signup_controller.dart';
+import '../model/signup_model.dart';
+import 'login_email_page.dart';
+
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
 
@@ -15,8 +19,26 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController confirmCtrl = TextEditingController();
 
   bool agree = false;
+  bool isLoading = false;
 
-  void _signup() {
+  final SignupController _controller = SignupController();
+
+  void _signup() async {
+    print("🔥 SIGNUP BUTTON CLICKED");
+
+    // ✅ Empty Field Validation
+    if (nameCtrl.text.trim().isEmpty ||
+        emailCtrl.text.trim().isEmpty ||
+        mobileCtrl.text.trim().isEmpty ||
+        passCtrl.text.trim().isEmpty ||
+        confirmCtrl.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("All fields are required")),
+      );
+      return;
+    }
+
+    // ✅ Terms Validation
     if (!agree) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Accept Terms & Conditions")),
@@ -24,14 +46,63 @@ class _SignupPageState extends State<SignupPage> {
       return;
     }
 
-    if (passCtrl.text != confirmCtrl.text) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Passwords do not match")));
+    // ✅ Password Length Validation
+    if (passCtrl.text.trim().length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Password must be at least 6 characters"),
+        ),
+      );
       return;
     }
 
-    debugPrint("Signup Successful");
+    // ✅ Confirm Password Match
+    if (passCtrl.text.trim() != confirmCtrl.text.trim()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Passwords do not match")),
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    final model = SignupModel(
+      name: nameCtrl.text.trim(),
+      email: emailCtrl.text.trim(),
+      password: passCtrl.text.trim(),
+      confirmPassword: confirmCtrl.text.trim(),
+      mobileNumber: mobileCtrl.text.trim(),
+    );
+
+    print("📤 Data Going To API: ${model.toJson()}");
+
+    try {
+      final result = await _controller.register(model);
+
+      print("📥 Controller Result: $result");
+
+      if (result == "Success") {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Registration Successful 🎉")),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginEmailPage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(result)));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Something went wrong")),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+    }
   }
 
   @override
@@ -41,47 +112,45 @@ class _SignupPageState extends State<SignupPage> {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
+        toolbarHeight: 35,
         elevation: 0,
-        backgroundColor: bgColor, // same as body
+        backgroundColor: bgColor,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(1),
         child: Column(
           children: [
-            // Bigger Center Logo
             Center(
-              child: Image.asset(
-                'assets/images/niveshtital.png',
+              child: SizedBox(
                 height: 180,
-                width: 280,
-                fit: BoxFit.contain,
+                width: 370,
+                child: Image.asset(
+                  'assets/images/niveshtital.png',
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
-
-            const SizedBox(height: 10),
-
-            // Bigger Card
             Card(
-              elevation: 5,
+              elevation: 2,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(25), // increased padding
+                padding: const EdgeInsets.all(5),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Create an Account",
-                      style: TextStyle(
-                        fontSize: 23,
-                        fontWeight: FontWeight.bold,
+                    const Center(
+                      child: Text(
+                        "Create an Account",
+                        style: TextStyle(
+                          fontSize: 23,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-
-                    const SizedBox(height: 22),
-
+                    const SizedBox(height: 18),
                     _textField("Name", nameCtrl),
                     _textField("Email Address", emailCtrl),
                     _textField(
@@ -91,7 +160,6 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                     _textField("Password", passCtrl, obscure: true),
                     _textField("Confirm Password", confirmCtrl, obscure: true),
-
                     CheckboxListTile(
                       value: agree,
                       onChanged: (v) => setState(() => agree = v!),
@@ -99,10 +167,11 @@ class _SignupPageState extends State<SignupPage> {
                       controlAffinity: ListTileControlAffinity.leading,
                       contentPadding: EdgeInsets.zero,
                     ),
-
-                    const SizedBox(height: 15),
-
-                    _primaryButton("Sign Up", _signup),
+                    const SizedBox(height: 10),
+                    isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : _primaryButton("Sign Up", _signup),
+                    SizedBox(height: 10,)
                   ],
                 ),
               ),
@@ -114,11 +183,11 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   Widget _textField(
-    String hint,
-    TextEditingController controller, {
-    bool obscure = false,
-    TextInputType type = TextInputType.text,
-  }) {
+      String hint,
+      TextEditingController controller, {
+        bool obscure = false,
+        TextInputType type = TextInputType.text,
+      }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: TextField(
@@ -151,9 +220,9 @@ class _SignupPageState extends State<SignupPage> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: Text(
-          text,
-          style: const TextStyle(color: Colors.black, fontSize: 16),
+        child: const Text(
+          "Sign Up",
+          style: TextStyle(color: Colors.black, fontSize: 16),
         ),
       ),
     );

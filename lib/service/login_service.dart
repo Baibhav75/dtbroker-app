@@ -21,13 +21,29 @@ class AuthService   {
     final data = jsonDecode(response.body);
     final loginResponse = LoginResponseModel.fromJson(data);
 
+    // if (loginResponse.status && loginResponse.data != null) {
+    //   await _storage.write(
+    //     key: "user_id",
+    //     value: loginResponse.data!.id.toString(),
+    //   );
+    //
+    //   print("✅ USER ID SAVED: ${loginResponse.data!.id}");
+    // }
     if (loginResponse.status && loginResponse.data != null) {
+      final user = loginResponse.data!;
+
       await _storage.write(
         key: "user_id",
-        value: loginResponse.data!.id.toString(),
+        value: user.id.toString(),
       );
 
-      print("✅ USER ID SAVED: ${loginResponse.data!.id}");
+      await _storage.write(
+        key: "unique_id",   // 🔥 NEW LINE
+        value: user.uniqueId,
+      );
+
+      print("✅ USER ID SAVED: ${user.id}");
+      print("✅ UNIQUE ID SAVED: ${user.uniqueId}");
     }
 
     return loginResponse;

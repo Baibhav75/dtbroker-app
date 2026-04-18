@@ -1,4 +1,4 @@
-import 'package:dtbroker/HomeScreen/models/property_model.dart';
+import 'package:dtbroker/model/property_model.dart';
 import 'package:dtbroker/HomeScreen/property_detail_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -41,11 +41,29 @@ class PropertyListCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(16)),
-                  child:Image.asset(
-                    property.imageUrl, // 'assets/images/homeimg.png'
-                    height: 200,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
+                  child:ClipRRect(
+                    borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
+                    child: property.imageUrl.startsWith('http')
+                        ? Image.network(
+                      property.imageUrl,
+                      height: 200,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          height: 200,
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.broken_image),
+                        );
+                      },
+                    )
+                        : Image.asset(
+                      property.imageUrl,
+                      height: 200,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
                   )
 
                 ),

@@ -188,5 +188,4 @@ class Message {
     required this.timestamp,
     required this.isRead,
   });
-}
-
+} //

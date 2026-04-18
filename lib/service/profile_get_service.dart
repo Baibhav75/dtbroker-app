@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import '../model/profile_get_model.dart';
+import '../model/prfile_model.dart';
 
 
 class ProfileService {

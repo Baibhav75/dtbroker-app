@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/property_model.dart';
+import '../../model/property_model.dart';
 
 class RecommendedCard extends StatelessWidget {
   final Property property;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../Agentchat/chat_page.dart';
 import 'property_detail_screen.dart';
-import 'models/property_model.dart';
+import '../model/property_model.dart';
 
 class ShortlistedScreenContent extends StatefulWidget {
   const ShortlistedScreenContent({super.key});

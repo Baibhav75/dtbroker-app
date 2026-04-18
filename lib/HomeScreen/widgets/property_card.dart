@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/property_model.dart';
+import '../../model/property_model.dart';
 
 // Property Card Widget
 class PropertyCard extends StatefulWidget {
@@ -41,7 +41,6 @@ class _PropertyCardState extends State<PropertyCard> {
       ],
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -71,7 +70,9 @@ class _PropertyCardState extends State<PropertyCard> {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(12),
                   ),
-                  child: Image.asset(
+                  child: (widget.property.imageUrl.isNotEmpty &&
+                      widget.property.imageUrl.startsWith("http"))
+                      ? Image.network(
                     widget.property.imageUrl,
                     width: double.infinity,
                     height: 180,
@@ -80,9 +81,22 @@ class _PropertyCardState extends State<PropertyCard> {
                       return Container(
                         height: 180,
                         color: Colors.grey[300],
-                        child: const Icon(Icons.home, size: 50),
+                        child: const Icon(Icons.broken_image, size: 50),
                       );
                     },
+                  )
+                      : widget.property.imageUrl.isNotEmpty
+                      ? Image.asset(
+                    widget.property.imageUrl,
+                    width: double.infinity,
+                    height: 180,
+                    fit: BoxFit.cover,
+                  )
+                      : Container(
+                    height: 180,
+                    width: double.infinity,
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.image_not_supported, size: 50),
                   ),
                 ),
 
@@ -110,11 +124,8 @@ class _PropertyCardState extends State<PropertyCard> {
                         ],
                       ),
                       child: Icon(
-                        isFavorite
-                            ? Icons.favorite
-                            : Icons.favorite_border,
-                        color:
-                        isFavorite ? Colors.red : Colors.grey,
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isFavorite ? Colors.red : Colors.grey,
                         size: 20,
                       ),
                     ),
@@ -221,45 +232,32 @@ class _PropertyCardState extends State<PropertyCard> {
 
                   const SizedBox(height: 8),
 
-
-
                   // 🛏 Beds | 🛁 Baths | 📐 Area
                   Wrap(
                     spacing: 12,
                     runSpacing: 6,
                     children: [
-                      _info(
-                        Icons.bed,
-                        '${widget.property.bedrooms} Beds',
-
-                      ),
-                      _info(
-                        Icons.bathtub,
-                        '${widget.property.bathrooms} Bath',
-                      ),
-                      _info(
-                        Icons.square_foot,
-                        '${widget.property.areaSqft} sqft',
-                      ),
+                      _info(Icons.bed, '${widget.property.bedrooms} Beds'),
+                      _info(Icons.bathtub, '${widget.property.bathrooms} Bath'),
+                      _info(Icons.square_foot, '${widget.property.areaSqft} sqft'),
                     ],
                   ),
+
                   const SizedBox(height: 8),
-                  // 👤 OWNER INFO (Name + Logo)
+
+                  // 👤 OWNER INFO
                   Row(
                     children: [
                       CircleAvatar(
                         radius: 14,
                         backgroundColor: Colors.grey[200],
-                        backgroundImage: AssetImage(
-                          widget.property.ownerLogo,
-                        ),
-                        onBackgroundImageError: (_, __) {},
+                        backgroundImage:
+                        widget.property.ownerLogo.startsWith("http")
+                            ? NetworkImage(widget.property.ownerLogo)
+                            : AssetImage(widget.property.ownerLogo)
+                        as ImageProvider,
                         child: widget.property.ownerLogo.isEmpty
-                            ? const Icon(
-                          Icons.person,
-                          size: 16,
-                          color: Colors.grey,
-                        )
+                            ? const Icon(Icons.person, size: 16)
                             : null,
                       ),
                       const SizedBox(width: 8),
@@ -276,7 +274,6 @@ class _PropertyCardState extends State<PropertyCard> {
                       ),
                     ],
                   ),
-
                 ],
               ),
             ),
@@ -285,6 +282,250 @@ class _PropertyCardState extends State<PropertyCard> {
       ),
     );
   }
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   return GestureDetector(
+  //     onTap: widget.onTap,
+  //     child: Container(
+  //       width: 280,
+  //       margin: const EdgeInsets.only(right: 16),
+  //       decoration: BoxDecoration(
+  //         borderRadius: BorderRadius.circular(12),
+  //         color: Colors.white,
+  //         boxShadow: [
+  //           BoxShadow(
+  //             color: Colors.grey.withOpacity(0.1),
+  //             spreadRadius: 1,
+  //             blurRadius: 5,
+  //             offset: const Offset(0, 2),
+  //           ),
+  //         ],
+  //       ),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           // 🖼 IMAGE + HEART
+  //           Stack(
+  //             children: [
+  //               ClipRRect(
+  //                 borderRadius: const BorderRadius.vertical(
+  //                   top: Radius.circular(12),
+  //                 ),
+  //                 child: Image.asset(
+  //                   widget.property.imageUrl,
+  //                   width: double.infinity,
+  //                   height: 180,
+  //                   fit: BoxFit.cover,
+  //                   errorBuilder: (context, error, stackTrace) {
+  //                     return Container(
+  //                       height: 180,
+  //                       color: Colors.grey[300],
+  //                       child: const Icon(Icons.home, size: 50),
+  //                     );
+  //                   },
+  //                 ),
+  //               ),
+  //
+  //               // ❤️ Favorite Icon
+  //               Positioned(
+  //                 top: 12,
+  //                 right: 12,
+  //                 child: GestureDetector(
+  //                   onTap: () {
+  //                     setState(() {
+  //                       isFavorite = !isFavorite;
+  //                     });
+  //                   },
+  //                   child: AnimatedContainer(
+  //                     duration: const Duration(milliseconds: 200),
+  //                     padding: const EdgeInsets.all(6),
+  //                     decoration: BoxDecoration(
+  //                       color: Colors.white.withOpacity(0.9),
+  //                       shape: BoxShape.circle,
+  //                       boxShadow: [
+  //                         BoxShadow(
+  //                           color: Colors.black.withOpacity(0.15),
+  //                           blurRadius: 6,
+  //                         ),
+  //                       ],
+  //                     ),
+  //                     child: Icon(
+  //                       isFavorite
+  //                           ? Icons.favorite
+  //                           : Icons.favorite_border,
+  //                       color:
+  //                       isFavorite ? Colors.red : Colors.grey,
+  //                       size: 20,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //
+  //               // 📈 Growth Indicator Badge
+  //               if (widget.property.growthRate != null)
+  //                 Positioned(
+  //                   top: 12,
+  //                   left: 12,
+  //                   child: Container(
+  //                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+  //                     decoration: BoxDecoration(
+  //                       color: const Color(0xFF2D5016),
+  //                       borderRadius: BorderRadius.circular(20),
+  //                       boxShadow: [
+  //                         BoxShadow(
+  //                           color: Colors.black.withOpacity(0.2),
+  //                           blurRadius: 4,
+  //                           offset: const Offset(0, 2),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                     child: Row(
+  //                       mainAxisSize: MainAxisSize.min,
+  //                       children: [
+  //                         const Icon(
+  //                           Icons.trending_up,
+  //                           color: Colors.white,
+  //                           size: 14,
+  //                         ),
+  //                         const SizedBox(width: 4),
+  //                         Text(
+  //                           widget.property.growthRate!,
+  //                           style: const TextStyle(
+  //                             color: Colors.white,
+  //                             fontSize: 10,
+  //                             fontWeight: FontWeight.bold,
+  //                           ),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                 ),
+  //             ],
+  //           ),
+  //
+  //           // 📄 CONTENT
+  //           Padding(
+  //             padding: const EdgeInsets.all(12),
+  //             child: Column(
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: [
+  //                 // Title & Price
+  //                 Row(
+  //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                   children: [
+  //                     Expanded(
+  //                       child: Text(
+  //                         widget.property.title,
+  //                         style: const TextStyle(
+  //                           fontSize: 16,
+  //                           fontWeight: FontWeight.bold,
+  //                         ),
+  //                         maxLines: 1,
+  //                         overflow: TextOverflow.ellipsis,
+  //                       ),
+  //                     ),
+  //                     Text(
+  //                       widget.property.price,
+  //                       style: const TextStyle(
+  //                         fontSize: 16,
+  //                         fontWeight: FontWeight.bold,
+  //                         color: Color(0xFFFF6B35),
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //
+  //                 const SizedBox(height: 4),
+  //
+  //                 // Property Type
+  //                 Text(
+  //                   widget.property.type,
+  //                   style: TextStyle(
+  //                     fontSize: 12,
+  //                     color: Colors.grey[600],
+  //                   ),
+  //                 ),
+  //
+  //                 const SizedBox(height: 4),
+  //
+  //                 // Address
+  //                 Text(
+  //                   widget.property.address,
+  //                   style: TextStyle(
+  //                     fontSize: 12,
+  //                     color: Colors.grey[600],
+  //                   ),
+  //                   maxLines: 1,
+  //                   overflow: TextOverflow.ellipsis,
+  //                 ),
+  //
+  //                 const SizedBox(height: 8),
+  //
+  //
+  //
+  //                 // 🛏 Beds | 🛁 Baths | 📐 Area
+  //                 Wrap(
+  //                   spacing: 12,
+  //                   runSpacing: 6,
+  //                   children: [
+  //                     _info(
+  //                       Icons.bed,
+  //                       '${widget.property.bedrooms} Beds',
+  //
+  //                     ),
+  //                     _info(
+  //                       Icons.bathtub,
+  //                       '${widget.property.bathrooms} Bath',
+  //                     ),
+  //                     _info(
+  //                       Icons.square_foot,
+  //                       '${widget.property.areaSqft} sqft',
+  //                     ),
+  //                   ],
+  //                 ),
+  //                 const SizedBox(height: 8),
+  //                 // 👤 OWNER INFO (Name + Logo)
+  //                 Row(
+  //                   children: [
+  //                     CircleAvatar(
+  //                       radius: 14,
+  //                       backgroundColor: Colors.grey[200],
+  //                       backgroundImage: AssetImage(
+  //                         widget.property.ownerLogo,
+  //                       ),
+  //                       onBackgroundImageError: (_, __) {},
+  //                       child: widget.property.ownerLogo.isEmpty
+  //                           ? const Icon(
+  //                         Icons.person,
+  //                         size: 16,
+  //                         color: Colors.grey,
+  //                       )
+  //                           : null,
+  //                     ),
+  //                     const SizedBox(width: 8),
+  //                     Expanded(
+  //                       child: Text(
+  //                         widget.property.ownerName,
+  //                         style: const TextStyle(
+  //                           fontSize: 13,
+  //                           fontWeight: FontWeight.w500,
+  //                         ),
+  //                         maxLines: 1,
+  //                         overflow: TextOverflow.ellipsis,
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //
+  //               ],
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 }
 
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
-import 'models/property_model.dart';
+import '../model/property_model.dart';
 
 class PropertyDetailScreen extends StatefulWidget {
   final Property property;
@@ -154,8 +154,25 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(20),
-            child: Image.asset(
+            child:
+            widget.property.imageUrl.startsWith("http")
+                ? Image.network(
               widget.property.imageUrl,
+              height: 230,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 230,
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.broken_image, size: 50),
+                );
+              },
+            )
+                : Image.asset(
+              widget.property.imageUrl.isEmpty
+                  ? 'assets/images/homeimg.png'
+                  : widget.property.imageUrl,
               height: 230,
               width: double.infinity,
               fit: BoxFit.cover,

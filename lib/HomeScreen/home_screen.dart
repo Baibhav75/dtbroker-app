@@ -3,10 +3,11 @@ import 'package:dtbroker/HomeScreen/search_screen.dart';
 import 'package:dtbroker/HomeScreen/seeAllListPage.dart';
 import 'package:dtbroker/HomeScreen/property_detail_screen.dart';
 import 'package:dtbroker/HomeScreen/widgets/recommended_card.dart';
-import 'package:dtbroker/FlipCardLocationPage.dart';
+ import 'package:dtbroker/FlipCardLocationPage.dart';
+import 'package:dtbroker/controller/newproperty_list_controller.dart';
 import 'package:flutter/material.dart';
-import 'models/property_model.dart';
-import 'widgets/banner_carousel.dart';
+import '../controller/profile_controller.dart';
+import '../model/property_model.dart';
 import 'widgets/property_card.dart';
 import 'shortlisted_screen.dart';
 import 'inbox_screen.dart';
@@ -14,7 +15,7 @@ import 'profile_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'dart:async';
-
+import 'package:get/get.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,14 +25,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final ProfileController controller = Get.find();
+  final NewPropertyListController propertyController = Get.put(NewPropertyListController());
   int _currentBottomNavIndex = 0;
-  int _selectedCategoryIndex = 0; // default selected (House)
 
 
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounce;
   List<Property> _filteredFeatured = [];
-  List<Property> _filteredNewlyAdded = [];
   List<Property> _recommendedProperties = [];
 
 
@@ -42,13 +43,19 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _getLiveLocation();
-    _filteredFeatured = List.from(_featuredProperties);
-    _filteredNewlyAdded = List.from(_newlyAddedProperties);
-    _recommendedProperties = List.from(_featuredProperties.reversed);
-    // 👇 NEW
 
+    _getLiveLocation();
+
+    _filteredFeatured = List.from(_featuredProperties);
+
+    _recommendedProperties = List.from(_featuredProperties.reversed);
+
+    controller.loadProfile();
+
+    // 🔥 NEW API CALL
+    propertyController.loadNewlyAdded();
   }
+
 
   @override
   void dispose() {
@@ -102,30 +109,6 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
-  void _filterPropertiesByCategory(String categoryName) {
-    setState(() {
-      if (categoryName.toLowerCase() == 'house') {
-        _filteredFeatured =
-            _featuredProperties.where((p) => p.type == 'House').toList();
-        _filteredNewlyAdded =
-            _newlyAddedProperties.where((p) => p.type == 'House').toList();
-      } else if (categoryName.toLowerCase() == 'apartment') {
-        _filteredFeatured =
-            _featuredProperties.where((p) => p.type == 'Apartment').toList();
-        _filteredNewlyAdded =
-            _newlyAddedProperties.where((p) => p.type == 'Apartment').toList();
-      } else if (categoryName.toLowerCase() == 'villa') {
-        _filteredFeatured =
-            _featuredProperties.where((p) => p.type == 'Villa').toList();
-        _filteredNewlyAdded =
-            _newlyAddedProperties.where((p) => p.type == 'Villa').toList();
-      } else {
-        // fallback → show all
-        _filteredFeatured = List.from(_featuredProperties);
-        _filteredNewlyAdded = List.from(_newlyAddedProperties);
-      }
-    });
-  }
   final List<CityItem> cities = [
     CityItem(
       name: 'Delhi / NCR',
@@ -144,33 +127,6 @@ class _HomeScreenState extends State<HomeScreen> {
       image: 'https://images.unsplash.com/photo-1600788910554-5f2a7d63f42c',
     ),
   ];
-
-
-  // Property categories
-  final List<PropertyCategory> _categories = [
-    PropertyCategory(
-      id: '1',
-      name: 'House',
-      icon: Icons.home,
-    ),
-    PropertyCategory(
-      id: '2',
-      name: 'Apartment',
-      icon: Icons.apartment,
-    ),
-    PropertyCategory(
-      id: '3',
-      name: 'Villa',
-      icon: Icons.villa,
-    ),
-    PropertyCategory(
-      id: '4',
-      name: 'Plot',
-      icon: Icons.house_siding,
-    ),
-  ];
-
-
 
   // Featured properties
   final List<Property> _featuredProperties = [
@@ -255,46 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
   ];
 
-
-  // Newly added properties
-  final List<Property> _newlyAddedProperties = [
-    Property(
-      id: '3',
-      title: 'Modern Villa',
-      type: 'Villa',
-      address: '123 Main Street, California',
-      rating: 4.8,
-      price: '₹2990',
-      imageUrl: 'assets/images/homeimg.png',
-      tag: 'Rent',
-      bedrooms: 5,
-      bathrooms: 4,
-      areaSqft: 3200,
-      ownerName: 'Rahul Sharma',
-      ownerLogo: 'assets/images/owner1.png',
-
-    ),
-    Property(
-      id: '4',
-      title: 'Luxury Apartment',
-      type: 'Apartment',
-      address: '456 Park Avenue, California',
-      rating: 4.7,
-      price: '₹2990',
-      imageUrl: 'assets/images/homeimg.png',
-      tag: 'Rent',
-      bedrooms: 5,
-      bathrooms: 4,
-      areaSqft: 3200,
-      ownerName: 'Rahul Sharma',
-      ownerLogo: 'assets/images/owner1.png',
-    ),
-  ];
-
   String _currentAddress = "Vijay Nagar, MP";
-
-
-
 
   void _handleNavigation(int index) {
     if (index == 2) {
@@ -316,6 +233,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      onDrawerChanged: (isOpen) {
+        if (isOpen) {
+          Get.find<ProfileController>().loadProfile();
+        }
+      },
+
       drawer: _buildDrawer(), // ✅ ADD THIS
       body: SafeArea(
         child: Column(
@@ -361,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 3:
         return const InboxScreenContent();
       case 4:
-        return const ProfileScreenContent();
+        return  ProfileScreenContent();
       default:
         return _buildHomeContent();
     }
@@ -382,40 +305,143 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  String getImageUrl(String? path) {
+    if (path == null || path.trim().isEmpty) {
+      return "https://via.placeholder.com/150"; // fallback image
+    }
+
+    if (path.startsWith("http")) return path;
+
+    return "https://niveshcore.com/${path.startsWith("/") ? path.substring(1) : path}";
+  }
+
   Widget _buildHomeContent() {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Banner Carousel
 
 
-          // Property Categories
-          //property Categories like Home , Pg, Rent, house
-          // Featured Property Section
-          _buildSectionHeader('Featured Property', () {
+
+          /// Newly added property
+
+        const SizedBox(height: 24),
+          // Newly Added Property Section
+          _buildSectionHeader('Latest Property', () {
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => FeatureListScreen(
-                  title: 'Featured Property',
-                  properties: _filteredFeatured,
+                  title: 'Latest Property',
+                  properties: propertyController.newlyAddedList.map((data) {
+                    String imageUrl = "";
+
+                    if (data.propertyImage1 != null &&
+                        data.propertyImage1!.isNotEmpty) {
+                      imageUrl =
+                      "https://niveshcore.com${data.propertyImage1!.trim()}";
+                    }
+
+                    return Property(
+                      id: data.propertyId.toString(),
+                      title: data.propertyTitle ?? '',
+                      type: data.propertyType ?? '',
+                      address: "${data.city}, ${data.state}",
+                      rating: 4.5,
+                      price: "₹${data.price ?? 0}",
+                      imageUrl: imageUrl,
+                      tag: data.status ?? '',
+                      bedrooms: data.rooms ?? 0,
+                      bathrooms: data.bathrooms ?? 0,
+                      areaSqft: data.area?.toInt() ?? 0,
+                      ownerName: data.contactName ?? '',
+                      ownerLogo: '',
+                    );
+                  }).toList(),
                 ),
               ),
-
             );
           }),
           const SizedBox(height: 12),
-        _buildPropertyList(_filteredFeatured),
+          Obx(() {
+            if (propertyController.isLoading.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-        const SizedBox(height: 24),
-          // Newly Added Property Section
-          _buildSectionHeader('Newly added Property', () {
-            // Navigate to newly added properties page
+            if (propertyController.errorMessage.isNotEmpty) {
+              return Center(child: Text(propertyController.errorMessage.value));
+            }
+
+            if (propertyController.newlyAddedList.isEmpty) {
+              return const Center(child: Text("No Data Found"));
+            }
+
+            return SizedBox(
+              height: 340,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: propertyController.newlyAddedList.length,
+                itemBuilder: (context, index) {
+                  final data = propertyController.newlyAddedList[index];
+                  String imageUrl = "";
+
+                  if (data.propertyImage1 != null && data.propertyImage1!.isNotEmpty) {
+                    // imageUrl =
+                    // "https://niveshcore.com${data.propertyImage!.trim()}";
+                   // imageUrl = getImageUrl(data.propertyImage);
+                    Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          Image.asset("assets/images/profile.png"),
+                    );
+                  }
+                  return PropertyCard(
+                    property: Property(
+                      id: data.propertyId.toString(),
+                      title: data.propertyTitle ?? '',
+                      type: data.propertyType ?? '',
+                      address: "${data.city}, ${data.state}",
+                      rating: 4.5, // static (API me nahi hai)
+                      price: "₹${data.price ?? 0}",
+                      imageUrl: imageUrl,
+                      tag: data.status ?? '',
+                      bedrooms: data.rooms ?? 0,
+                      bathrooms: data.bathrooms ?? 0,
+                      areaSqft: data.area?.toInt() ?? 0,
+                      ownerName: data.contactName ?? '',
+                      ownerLogo: '',
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PropertyDetailScreen(
+                            property: Property(
+                              id: data.propertyId.toString(),
+                              title: data.propertyTitle ?? '',
+                              type: data.propertyType ?? '',
+                              address: "${data.city}, ${data.state}",
+                              rating: 4.5,
+                              price: "₹${(data.price ?? 0).toString()}",
+                              imageUrl: imageUrl,
+                              tag: data.status ?? '',
+                              bedrooms: data.rooms ?? 0,
+                              bathrooms: data.bathrooms ?? 0,
+                              areaSqft: (data.area ?? 0).toInt(),
+                              ownerName: data.contactName ?? '',
+                              ownerLogo: '',
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            );
           }),
-          const SizedBox(height: 12),
-          _buildPropertyList(_filteredNewlyAdded),
-          
+
           const SizedBox(height: 24),
           // Recommended For You Section
           _buildSectionHeader('Recommended For You', () {
@@ -430,10 +456,24 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           }),
           const SizedBox(height: 12),
-          const SizedBox(height: 12),
           _buildRecommendedList(_recommendedProperties),
-          
           const SizedBox(height: 20),
+
+            _buildSectionHeader('High Demand Property', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => FeatureListScreen(
+                    title: 'High Demand Property',
+                    properties: _filteredFeatured,
+                  ),
+                ),
+
+              );
+            }),
+            const SizedBox(height: 12),
+          _buildPropertyList(_filteredFeatured),
+
       SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -524,119 +564,6 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
         ),
-
-
-        const SizedBox(height: 24),
-
-            // 🔹 BUYING COMMERCIAL PROPERTY
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    'Buying a commercial property',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Shops, offices, land, factories, warehouses and more',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  'assets/images/Buyingimage.png',
-                  height: 180,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text(
-                    'Explore all commercial buying options',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                  Icon(Icons.arrow_forward),
-                ],
-              ),
-            ),
-
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: Text(
-                'Over 79,000 properties and 9,500 projects',
-                style: TextStyle(color: Colors.grey, fontSize: 12),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // 🔹 TOP ARTICLES
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: const [
-                  Icon(Icons.article_outlined),
-                  SizedBox(width: 8),
-                  Text(
-                    'Top articles on commercial buying',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: Text(
-                'Know more about latest realty trends',
-                style: TextStyle(color: Colors.grey),
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // 🔹 TABS
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Wrap(
-                spacing: 16,
-                children: const [
-                  Text('News', style: TextStyle(fontWeight: FontWeight.w600)),
-                  Text('Tax & Legal'),
-                  Text('Help Guides'),
-                  Text('Investment'),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
           ],
         ),
       )
@@ -855,8 +782,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
-
   void _onSearchChanged(String query) {
     if (_searchDebounce?.isActive ?? false) _searchDebounce!.cancel();
 
@@ -866,7 +791,6 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         if (searchText.isEmpty) {
           _filteredFeatured = List.from(_featuredProperties);
-          _filteredNewlyAdded = List.from(_newlyAddedProperties);
           return;
         }
 
@@ -880,13 +804,9 @@ class _HomeScreenState extends State<HomeScreen> {
         _filteredFeatured =
             _featuredProperties.where(matches).toList();
 
-        _filteredNewlyAdded =
-            _newlyAddedProperties.where(matches).toList();
       });
     });
   }
-
-
 
   // 🔍 SEARCH → NEW PAGE
   Widget _buildSearchBar() {
@@ -919,95 +839,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCategoryItem(
-      PropertyCategory category,
-      int index,
-      bool isSelected,
-      ) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedCategoryIndex = index;
-        });
-        _filterPropertiesByCategory(category.name);
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-        width: 90,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          gradient: isSelected
-              ? const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFEAF4FF),
-              Color(0xFFD6E8FF),
-            ],
-          )
-              : const LinearGradient(
-            colors: [Colors.white, Colors.white],
-          ),
-          boxShadow: [
-            if (isSelected)
-              BoxShadow(
-                color: Colors.blue.withOpacity(0.25),
-                blurRadius: 14,
-                offset: const Offset(0, 8),
-              )
-            else
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 6,
-                offset: const Offset(0, 3),
-              ),
-          ],
-          border: Border.all(
-            color: isSelected
-                ? Colors.blue.withOpacity(0.4)
-                : Colors.grey.withOpacity(0.2),
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // 🔥 Icon Animation
-            AnimatedScale(
-              duration: const Duration(milliseconds: 300),
-              scale: isSelected ? 1.25 : 1.0,
-              child: AnimatedSlide(
-                duration: const Duration(milliseconds: 300),
-                offset: isSelected ? const Offset(0, -0.05) : Offset.zero,
-                child: Icon(
-                  category.icon,
-                  size: 30,
-                  color: isSelected
-                      ? const Color(0xFF1E88E5)
-                      : Colors.black54,
-                ),
-              ),
-            ),
-
-            // 🔤 Text Animation
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 300),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: isSelected
-                    ? const Color(0xFF1E88E5)
-                    : Colors.black54,
-              ),
-              child: Text(category.name),
-            ),
-          ],
-        ),
-      ),
-    );
-
-  }
 
   Widget _buildSectionHeader(String title, VoidCallback onSeeAll) {
     return Padding(
@@ -1111,6 +942,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Bottom Navigation
+
   Widget _buildBottomNavigation() {
     return Container(
       decoration: BoxDecoration(
@@ -1188,14 +1021,26 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+
+  /// Drawer section
+
   Widget _buildDrawer() {
-    return Drawer(
+
+    final ProfileController controller = Get.find();
+
+    return Obx(() {
+
+      final user = controller.profile.value?.data;
+
+      return Drawer(
+        backgroundColor: Colors.white,
         child: Column(
           children: [
-            // 🔹 HEADER
+
+            /// 🔥 PREMIUM HEADER (DYNAMIC)
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 30, 20, 24),
+              padding: const EdgeInsets.fromLTRB(20, 40, 20, 25),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -1205,35 +1050,65 @@ class _HomeScreenState extends State<HomeScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(25),
+                  bottomRight: Radius.circular(25),
+                ),
               ),
               child: Row(
-                children: const [
-                  CircleAvatar(
-                    radius: 34,
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.person,
-                      size: 38,
-                      color: Color(0xFF2D5016),
+                children: [
+
+                  /// 🔥 PROFILE IMAGE (DYNAMIC)
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        )
+                      ],
+                    ),
+                    child: CircleAvatar(
+                      radius: 32,
+                      backgroundColor: Colors.white,
+                      backgroundImage: (user?.profile != null &&
+                          user!.profile.isNotEmpty)
+                          ? NetworkImage(
+                        "https://niveshcore.com${user.profile.replaceAll("~", "")}",
+                      )
+                          : null,
+                      child: (user?.profile == null ||
+                          user!.profile.isEmpty)
+                          ? const Icon(
+                        Icons.person,
+                        size: 34,
+                        color: Color(0xFF2D5016),
+                      )
+                          : null,
                     ),
                   ),
-                  SizedBox(width: 14),
+
+                  const SizedBox(width: 14),
+
+                  /// 🔥 NAME (DYNAMIC)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Welcome',
+                      const Text(
+                        "Welcome Back 👋",
                         style: TextStyle(
                           color: Colors.white70,
-                          fontSize: 14,
+                          fontSize: 13,
                         ),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 4),
                       Text(
-                        'User',
-                        style: TextStyle(
+                        user?.name ?? "Loading...",
+                        style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 18,
+                          fontSize: 19,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -1243,32 +1118,45 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 15),
 
-            _drawerItem(Icons.home_outlined, 'Home', () {
+            /// 🔹 MENU ITEMS
+            _premiumDrawerItem(Icons.dashboard_outlined, 'Dashboard', () {
               Navigator.pop(context);
             }),
 
-            _drawerItem(Icons.favorite_border, 'Shortlisted', () {
+            _premiumDrawerItem(Icons.favorite_border, 'Shortlisted', () {
               setState(() => _currentBottomNavIndex = 1);
               Navigator.pop(context);
             }),
 
-            _drawerItem(Icons.inbox_outlined, 'Inbox', () {
-              setState(() => _currentBottomNavIndex = 3);
+            _premiumDrawerItem(Icons.list_alt, 'Index', () {
               Navigator.pop(context);
             }),
 
-            _drawerItem(Icons.person_outline, 'Profile', () {
+            _premiumDrawerItem(Icons.person_outline, 'Profile', () {
               setState(() => _currentBottomNavIndex = 4);
+              Navigator.pop(context);
+            }),
+
+            const SizedBox(height: 10),
+            const Divider(thickness: 1),
+
+            /// 🔹 EXTRA OPTIONS
+            _premiumDrawerItem(Icons.privacy_tip_outlined, 'Privacy Policy', () {
+              Navigator.pop(context);
+            }),
+
+            _premiumDrawerItem(Icons.description_outlined, 'Terms & Conditions', () {
               Navigator.pop(context);
             }),
 
             const Spacer(),
 
-            const Divider(thickness: 1),
+            const Divider(),
 
-            _drawerItem(
+            /// 🔹 LOGOUT
+            _premiumDrawerItem(
               Icons.logout,
               'Logout',
                   () {
@@ -1282,11 +1170,12 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 12),
           ],
         ),
-
-    );
+      );
+    });
   }
 
-  Widget _drawerItem(
+  /// 🔥 PREMIUM ITEM DESIGN
+  Widget _premiumDrawerItem(
       IconData icon,
       String title,
       VoidCallback onTap, {
@@ -1294,29 +1183,42 @@ class _HomeScreenState extends State<HomeScreen> {
         Color textColor = Colors.black87,
       }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      child: ListTile(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        leading: Icon(icon, color: iconColor, size: 22),
-        title: Text(
-          title,
-          style: TextStyle(
-            color: textColor,
-            fontSize: 15.5,
-            fontWeight: FontWeight.w500,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.grey.shade100,
+            ),
+            child: Row(
+              children: [
+                Icon(icon, color: iconColor, size: 22),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 15.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Icon(Icons.arrow_forward_ios,
+                    size: 14, color: Colors.grey.shade500)
+              ],
+            ),
           ),
         ),
-        onTap: onTap,
-        horizontalTitleGap: 10,
-        dense: true,
-        splashColor: Colors.green.withOpacity(0.15),
-        hoverColor: Colors.green.withOpacity(0.05),
       ),
     );
   }
-
 
 }
 

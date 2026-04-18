@@ -99,10 +99,13 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 );
               },
+            child: FractionallySizedBox(
+              widthFactor: 1.3,   // 80% screen width
               child: Image.asset(
-                'assets/images/logo.png',
-                width: MediaQuery.of(context).size.width * 0.75,
+                'assets/images/splash.png',
+                fit: BoxFit.contain,
               ),
+            ),
             ),
           ),
         ],

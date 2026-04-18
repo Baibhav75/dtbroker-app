@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:dtbroker/controller/profile_get_controller.dart';
 import 'package:dtbroker/profile/how_it_works_page.dart';
 import 'package:dtbroker/profile/my_deals_page.dart';
 import 'package:dtbroker/profile/my_posted_properties_page.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-
+import 'package:get/get.dart';
+import '../controller/profile_controller.dart';
 import '../profile/AboutAppPage.dart';
 import '../profile/My_information_page.dart';
 import '../profile/support_page.dart';
@@ -19,13 +19,14 @@ class MyProfileScreen extends StatefulWidget {
 }
 
 class _MyProfileScreenState extends State<MyProfileScreen> {
-  final ProfileController _controller=ProfileController();
+  final ProfileController controller = Get.find();
   File? _profileImage;
   final ImagePicker _picker = ImagePicker();
 
-  void initState(){
+  @override
+  void initState() {
     super.initState();
-    _controller.loadProfile();
+    controller.loadProfile();
   }
 
   // 📷 Open Camera
@@ -62,82 +63,133 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           ),
         ),
       ),
-        body: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, _) {
-              final user = _controller.profile?.data;
+      body: Obx(() {
 
-              return SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 24),
+        /// 🔥 LOADING
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-                    // ---------- PROFILE IMAGE ----------
-                    Stack(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(3),
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color(0xFF2D5016),
-                          ),
-                          child: CircleAvatar(
-                            radius: 55,
-                            backgroundImage: _profileImage != null
-                                ? FileImage(_profileImage!)
-                                : const AssetImage('assets/images/homeimg.png')
-                            as ImageProvider,
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 6,
-                          right: 6,
-                          child: GestureDetector(
-                            onTap: _openCamera,
-                            child: Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.camera_alt,
-                                size: 18,
-                                color: Color(0xFF2D5016),
-                              ),
-                            ),
-                          ),
+        final user = controller.profile.value?.data;
+
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+
+              const SizedBox(height: 30),
+
+              /// 🔥 PROFILE IMAGE
+              Stack(
+                alignment: Alignment.center,
+                children: [
+
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.15),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
                         ),
                       ],
                     ),
-
-                    const SizedBox(height: 12),
-
-                    // ---------- DYNAMIC NAME ----------
-                    Text(
-                      user?.name ?? "Loading...",
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFF2D5016),
+                      ),
+                      child: CircleAvatar(
+                        radius: 55,
+                        backgroundColor: Colors.grey.shade200,
+                        backgroundImage: _profileImage != null
+                            ? FileImage(_profileImage!)
+                            : (user?.profile != null &&
+                            user!.profile.isNotEmpty)
+                            ? NetworkImage(
+                          "https://niveshcore.com${user.profile.replaceAll("~", "")}",
+                        )
+                            : null,
+                        child: (_profileImage == null &&
+                            (user?.profile == null ||
+                                user!.profile.isEmpty))
+                            ? const Icon(Icons.person, size: 40)
+                            : null,
                       ),
                     ),
+                  ),
 
-                    const SizedBox(height: 32),
+                  /// 📷 CAMERA BUTTON
+                  Positioned(
+                    bottom: 0,
+                    right: 4,
+                    child: GestureDetector(
+                      onTap: _openCamera,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          size: 18,
+                          color: Color(0xFF2D5016),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
 
-                    // ----- baaki menu same -----
+              const SizedBox(height: 16),
 
+              /// 🔥 NAME
+              Text(
+                user?.name ?? "No Name",
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
 
-                    // ---------- MENU LIST ----------
+              const SizedBox(height: 4),
+
+              /// 🔥 EMAIL
+              Text(
+                user?.email ?? "",
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              /// 🔥 MENU CARD
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 8,
+                    )
+                  ],
+                ),
+                child: Column(
+                  children: [
+
                     _menuItem(
                       icon: Icons.info_outline,
                       title: 'My Information',
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const MyInformationPage(),
-                          ),
-                        );
+                        Get.to(() => const MyInformationPage());
                       },
                     ),
 
@@ -145,12 +197,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       icon: Icons.home_work_outlined,
                       title: 'My Posted Properties',
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const MyPostedPropertiesPage(),
-                          ),
-                        );
+                        Get.to(() => const MyPostedPropertiesPage());
                       },
                     ),
 
@@ -158,27 +205,17 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       icon: Icons.handshake_outlined,
                       title: 'My Deals',
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const MyDealsPage(),
-                          ),
-                        );
+                        Get.to(() => const MyDealsPage());
                       },
                     ),
 
-                    const SizedBox(height: 16),
+                    const Divider(),
 
                     _menuItem(
                       icon: Icons.help_outline,
                       title: 'How it Works',
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const HowItWorksPage(),
-                          ),
-                        );
+                        Get.to(() => const HowItWorksPage());
                       },
                     ),
 
@@ -186,12 +223,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       icon: Icons.support_agent_outlined,
                       title: 'Support',
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const SupportPage(),
-                          ),
-                        );
+                        Get.to(() => const SupportPage());
                       },
                     ),
 
@@ -199,21 +231,19 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       icon: Icons.info_outline,
                       title: 'About',
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const AboutAppPage(),
-                          ),
-                        );
+                        Get.to(() => const AboutAppPage());
                       },
                     ),
-
-                    const SizedBox(height: 24),
                   ],
                 ),
-              );
-            }
-            ),
+              ),
+
+              const SizedBox(height: 30),
+            ],
+          ),
+        );
+      }),
+
     );
   }
 

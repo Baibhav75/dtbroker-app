@@ -1,8 +1,13 @@
 import 'package:dtbroker/splashScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import 'controller/profile_controller.dart';
 
 void main() {
+  Get.put(ProfileController(),permanent: true);
   runApp(const DTBrokerApp());
+
 }
 
 class DTBrokerApp extends StatelessWidget {
@@ -10,7 +15,7 @@ class DTBrokerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Nivesh Core',
       theme: ThemeData(

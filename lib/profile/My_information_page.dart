@@ -1,6 +1,7 @@
 import 'package:dtbroker/profile/edit_information_screen.dart';
 import 'package:flutter/material.dart';
-import '../controller/profile_get_controller.dart';
+import '../controller/profile_controller.dart';
+import 'package:get/get.dart';
 
 class MyInformationPage extends StatefulWidget {
   const MyInformationPage({Key? key}) : super(key: key);
@@ -11,13 +12,12 @@ class MyInformationPage extends StatefulWidget {
 
 class _MyInformationPageState extends State<MyInformationPage> {
 
-
-  final ProfileController _controller = ProfileController();
+  final ProfileController controller = Get.find();
 
   @override
   void initState() {
     super.initState();
-    _controller.loadProfile();
+    controller.loadProfile();
   }
 
   @override
@@ -27,130 +27,188 @@ class _MyInformationPageState extends State<MyInformationPage> {
         title: const Text("My Information"),
         centerTitle: true,
       ),
-      body: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, _) {
 
-          if (_controller.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
+      body: Obx(() {
 
-          final user = _controller.profile?.data;
+        /// 🔥 LOADING
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
+        final user = controller.profile.value?.data;
 
-                // ---------- PROFILE IMAGE ----------
-                CircleAvatar(
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+
+              /// 🔥 PROFILE IMAGE
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 10,
+                    )
+                  ],
+                ),
+                child: CircleAvatar(
                   radius: 50,
-                  backgroundColor: Colors.blue.shade100,
-                  child: const Icon(
-                    Icons.person,
-                    size: 50,
-                    color: Colors.blue,
+                  backgroundColor: Colors.grey.shade200,
+                  backgroundImage: (user?.profile != null &&
+                      user!.profile.isNotEmpty)
+                      ? NetworkImage(
+                    "https://niveshcore.com${user.profile.replaceAll("~", "")}",
+                  )
+                      : null,
+                  child: (user?.profile == null ||
+                      user!.profile.isEmpty)
+                      ? const Icon(Icons.person, size: 40)
+                      : null,
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              /// 🔥 NAME
+              Text(
+                user?.name ?? "No Name",
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 4),
+
+              /// 🔥 EMAIL
+              Text(
+                user?.email ?? "",
+                style: const TextStyle(
+                  color: Colors.grey,
+                ),
+              ),
+
+              const SizedBox(height: 25),
+
+              /// 🔥 INFO CARDS (PREMIUM)
+              _infoCard(
+                icon: Icons.phone,
+                title: "Phone",
+                value: user?.mobileNumber ?? "No Phone",
+              ),
+
+              _infoCard(
+                icon: Icons.location_city,
+                title: "City",
+                value: user?.city ?? "No City",
+              ),
+
+              _infoCard(
+                icon: Icons.map,
+                title: "State",
+                value: user?.state ?? "No State",
+              ),
+
+              _infoCard(
+                icon: Icons.home,
+                title: "Address",
+                value: user?.address ?? "No Address",
+              ),
+
+              _infoCard(
+                icon: Icons.pin_drop,
+                title: "Pincode",
+                value: user?.pincode ?? "No Pincode",
+              ),
+
+              const SizedBox(height: 30),
+
+              /// 🔥 EDIT BUTTON
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.edit),
+                  label: const Text("Edit Information"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2D5016),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
+                  onPressed: () async {
+
+                    if (user == null) return;
+
+                    final result = await Get.to(
+                          () => EditInformationPage(profileData: user),
+                    );
+
+                    if (result == true) {
+                      controller.loadProfile();
+                    }
+                  },
                 ),
-
-                const SizedBox(height: 12),
-
-                // ---------- NAME ----------
-                Text(
-                  user?.name ?? "No Name",
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 4),
-
-                // ---------- ROLE (Optional Static) ----------
-                const Text(
-                  "User",
-                  style: TextStyle(color: Colors.grey),
-                ),
-
-                const SizedBox(height: 24),
-
-                // ---------- INFO CARDS ----------
-                _infoCard(
-                  icon: Icons.email,
-                  title: "Email",
-                  value: user?.email ?? "No Email",
-                ),
-
-                _infoCard(
-                  icon: Icons.phone,
-                  title: "Phone",
-                  value: user?.mobile ?? "No Phone",
-                ),
-
-                _infoCard(
-                  icon: Icons.location_city,
-                  title: "City",
-                  value: user?.city ?? "No City",
-                ),
-
-                _infoCard(
-                  icon: Icons.map,
-                  title: "State",
-                  value: user?.state ?? "No State",
-                ),
-
-                const SizedBox(height: 30),
-
-                // ---------- EDIT BUTTON ----------
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.edit),
-                    label: const Text("Edit Information"),
-                    onPressed: () async {
-
-                      final user = _controller.profile?.data;
-
-                      if (user == null) return;
-
-                      final result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => EditInformationPage(
-                            profileData: user,
-                          ),
-                        ),
-                      );
-
-                      if (result == true) {
-                        _controller.loadProfile();
-                      }
-                    },
-                  ),
-                ),
-
-              ],
-            ),
-          );
-        },
-      ),
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
-
-  // ---------- INFO CARD ----------
   Widget _infoCard({
     required IconData icon,
     required String title,
     required String value,
   }) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: Icon(icon, color: Colors.blue),
-        title: Text(title),
-        subtitle: Text(value),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+          )
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: const BoxDecoration(
+              color: Color(0xFFE8F5E9),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: Color(0xFF2D5016)),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey,
+                    )),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

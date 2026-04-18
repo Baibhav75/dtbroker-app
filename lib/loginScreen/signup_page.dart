@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../controller/signup_controller.dart';
 import '../model/signup_model.dart';
 import 'login_email_page.dart';
-
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
 
@@ -17,7 +18,8 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController mobileCtrl = TextEditingController();
   final TextEditingController passCtrl = TextEditingController();
   final TextEditingController confirmCtrl = TextEditingController();
-
+  bool isPasswordHidden = true;
+  bool isConfirmPasswordHidden = true;
   bool agree = false;
   bool isLoading = false;
 
@@ -82,9 +84,25 @@ class _SignupPageState extends State<SignupPage> {
       print("📥 Controller Result: $result");
 
       if (result == "Success") {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Registration Successful 🎉")),
-        );
+        showTopSnackBar(
+          Overlay.of(context),
+          Material(
+            color: Colors.transparent,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.black87, // simple dark snackbar
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                "Registration Successful 🎉",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+
+                );
 
         Navigator.pushReplacement(
           context,
@@ -158,8 +176,29 @@ class _SignupPageState extends State<SignupPage> {
                       mobileCtrl,
                       type: TextInputType.phone,
                     ),
-                    _textField("Password", passCtrl, obscure: true),
-                    _textField("Confirm Password", confirmCtrl, obscure: true),
+                    _textField(
+                      "Password",
+                      passCtrl,
+                      obscure: isPasswordHidden,
+                      onToggle: () {
+                        setState(() {
+                          isPasswordHidden = !isPasswordHidden;
+                        });
+                      },
+                    ),
+
+                    _textField(
+                      "Confirm Password",
+                      confirmCtrl,
+                      obscure: isConfirmPasswordHidden,
+                      onToggle: () {
+                        setState(() {
+                          isConfirmPasswordHidden = !isConfirmPasswordHidden;
+                        });
+                      },
+                    ),
+                    // _textField("Password", passCtrl, obscure: true),
+                    // _textField("Confirm Password", confirmCtrl, obscure: true),
                     CheckboxListTile(
                       value: agree,
                       onChanged: (v) => setState(() => agree = v!),
@@ -181,11 +220,11 @@ class _SignupPageState extends State<SignupPage> {
       ),
     );
   }
-
   Widget _textField(
       String hint,
       TextEditingController controller, {
         bool obscure = false,
+        VoidCallback? onToggle, // ✅ optional
         TextInputType type = TextInputType.text,
       }) {
     return Padding(
@@ -198,11 +237,25 @@ class _SignupPageState extends State<SignupPage> {
           hintText: hint,
           filled: true,
           fillColor: Colors.grey.shade50,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 14,
             vertical: 15,
           ),
+
+          /// ✅ only show icon if password field
+          suffixIcon: onToggle != null
+              ? IconButton(
+            icon: Icon(
+              obscure
+                  ? Icons.visibility_off
+                  : Icons.visibility,
+            ),
+            onPressed: onToggle,
+          )
+              : null,
         ),
       ),
     );

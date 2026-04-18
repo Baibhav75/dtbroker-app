@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'models/property_model.dart';
+import '../model/property_model.dart';
 import 'widgets/property_card.dart';
 
 class SearchScreenContent extends StatefulWidget {

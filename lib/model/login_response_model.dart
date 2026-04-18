@@ -19,12 +19,14 @@ class UserData {
   final String name;
   final String email;
   final String mobileNumber;
+  final String uniqueId;
 
   UserData({
     required this.id,
     required this.name,
     required this.email,
     required this.mobileNumber,
+    required this.uniqueId
   });
 
   factory UserData.fromJson(Map<String, dynamic> json) {
@@ -33,24 +35,25 @@ class UserData {
       name: json["Name"],
       email: json["Email"],
       mobileNumber: json["MobileNumber"],
+      uniqueId: json["UniqueId"],
     );
   }
 }
 
-class LoginData {
-  final int id;
-  final String token;
-
-  LoginData({
-    required this.id,
-    required this.token,
-  });
-
-  factory LoginData.fromJson(Map<String, dynamic> json) {
-    return LoginData(
-      id: json['id'],
-      token: json['token'],
-    );
-  }
-}
+// class LoginData {
+//   final int id;
+//   final String token;
+//
+//   LoginData({
+//     required this.id,
+//     required this.token,
+//   });
+//
+//   factory LoginData.fromJson(Map<String, dynamic> json) {
+//     return LoginData(
+//       id: json['id'],
+//       token: json['token'],
+//     );
+//   }
+// }
 
